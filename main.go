@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+type node struct {
+}
+
 const ( //iota is reset to 0
 	INSERT = iota // INSERT=0
 	DELETE = iota // DELETE=1
@@ -20,9 +23,9 @@ type tweet struct {
 }
 
 type block struct {
-	targetuser int
-	user       int
-	clock      time.Time
+	user     int
+	follower int
+	clock    time.Time
 }
 
 type unblock struct {
