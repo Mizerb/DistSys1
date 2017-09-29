@@ -33,9 +33,9 @@ func makeNode(inputfile string) *Node {
 	}
 
 	type startinfo struct {
-		id          int
-		total_nodes int
-		IPs         []string
+		id         int
+		totalNodes int
+		IPs        []string
 	}
 
 	var info startinfo
@@ -48,9 +48,9 @@ func makeNode(inputfile string) *Node {
 	ret.log = make([]tweet, 1)
 	ret.logMutex = &sync.Mutex{}
 
-	ret.TimeArray = make([][]int, info.total_nodes)
+	ret.TimeArray = make([][]int, info.totalNodes)
 	for i := range ret.TimeArray {
-		ret.TimeArray[i] = make([]int, info.total_nodes)
+		ret.TimeArray[i] = make([]int, info.totalNodes)
 	}
 	ret.TimeMutex = &sync.Mutex{}
 

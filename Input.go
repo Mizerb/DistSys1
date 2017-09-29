@@ -13,14 +13,23 @@ func InputHandler() {
 		//done := make(chan bool)
 		fmt.Println("Please enter a Command:")
 		input, _ := reader.ReadString('\n')
+
 		if i := strings.Index(input, "tweet"); i == 0 {
-			fmt.Printf("Found at %d , TWEET\n", i)
+			message := input[6 : len(input)-1]
+			fmt.Println(message)
+			//userTweet := tweet{message, myIP, time.Now().UTC()}
+			//tweetUpdate(message, myIP)
 		} else if i := strings.Index(input, "view"); i == 0 {
-			fmt.Printf("great, now you get to see my history\n")
+			fmt.Printf("View called\n")
 		} else if i := strings.Index(input, "block"); i == 0 {
-			fmt.Printf("HOW DIRE!\n")
+			username := input[6 : len(input)-1]
+			fmt.Printf("Block called on %s\n", username)
 		} else if i := strings.Index(input, "unblock"); i == 0 {
-			fmt.Printf("HOW FRIENDLY\n")
+			username := input[8 : len(input)-1]
+			fmt.Printf("Unblock called on %s\n", username)
+		} else if i := strings.Index(input, "exit"); i == 0 {
+			fmt.Printf("Exit called, exiting...")
+			break
 		} else {
 			fmt.Printf("Command not recognized\n")
 		}
