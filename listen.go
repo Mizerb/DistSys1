@@ -2,7 +2,7 @@ package main
 
 import "net"
 
-func listen(port string) {
+func listen(port string, node ) {
 	ln, err := net.Listen("tcp", port)
 	if err != nil {
 		//crappp
