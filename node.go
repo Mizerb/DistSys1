@@ -14,6 +14,8 @@ type Node struct {
 	id int
 	Ci int
 
+	userName string
+
 	log      [][]tweet
 	logMutex *sync.Mutex
 
@@ -40,7 +42,7 @@ func makeNode(inputfile string) *Node {
 		IPs        []string
 	}
 
-	var info startinfo
+	var info startinfo //Deserialize the JSON
 	if err := json.Unmarshal(file, &info); err != nil {
 		panic(err)
 	}
@@ -53,8 +55,14 @@ func makeNode(inputfile string) *Node {
 	}
 	ret.logMutex = &sync.Mutex{}
 
-	if _, err := ret.LoadTweets(staticLog); err != nil {
-		log.Fatal("welp")
+	if check, err := ret.LoadTweets(staticLog); err != nil || check == false {
+		//log.Fatal("welp")
+		//create file
+		f, err := os.Create(staticLog)
+		if err != nil {
+			log.Fatal("cannot create log")
+		}
+		f.Close()
 	}
 
 	ret.TimeArray = make([][]int, info.totalNodes)
@@ -94,6 +102,21 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 	return true, nil
 }
 
+func (n *Node) writeLog() {
+	n.logMutex.Lock()
+	defer n.logMutex.Unlock()
+	logfile, err := os.Open(staticLog)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logBytes, err := json.Marshal(n.log)
+	if err != nil {
+		log.Fatal(err)
+		//might not want fatal here...
+	}
+
+}
+
 func (n *Node) hasRec(msg tweet, k int) bool {
 	n.TimeMutex.Lock()
 	ret := n.TimeArray[k][msg.user] >= msg.counter
@@ -109,4 +132,16 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 // I'll talk it over with Ian...
 func (n *Node) BroadCast(msg tweet) {
 	return
+}
+
+func (n *Node) receive(msg message) {
+
+	n.TimeMutex.Lock()
+	for i := range n.TimeArray {
+		for j := range n.TimeArray[i] {
+			n.TimeArray[i][j] = maxInt(n.TimeArray[i][j], msg.Ti[i][j])
+		}
+	}
+
+	n.TimeMutex.Unlock()
 }

@@ -22,7 +22,7 @@ func main() {
 		log.Fatalln("First arugment must configuration file")
 	}
 
-	local := makeNode(starting)
+	//local := makeNode(starting)
 	InputHandler()
 	return
 }
