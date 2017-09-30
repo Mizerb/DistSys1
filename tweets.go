@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type message struct {
+	Ti     [][]int
+	events [][]tweet
+}
+
 const ( //iota is reset to 0
 	TWEET  = iota
 	INSERT = iota // INSERT=0

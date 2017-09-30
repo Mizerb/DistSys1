@@ -2,7 +2,7 @@ package main
 
 import "net"
 
-func listen(port string) {
+func listen(port string, serv *Node) {
 	ln, err := net.Listen("tcp", port)
 	if err != nil {
 		//crappp
@@ -12,10 +12,11 @@ func listen(port string) {
 		if err != nil {
 			//crappppp
 		}
-		go handleConn(conn)
+		go handleConn(conn, serv)
 	}
 }
 
-func handleConn(conn net.Conn) {
+func handleConn(conn net.Conn, serv *Node) {
+
 	return
 }

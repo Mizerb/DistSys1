@@ -8,11 +8,13 @@ import (
 	"sync"
 )
 
+const staticLog = "./localLog.json"
+
 type Node struct {
 	id int
 	Ci int
 
-	log      []tweet
+	log      [][]tweet
 	logMutex *sync.Mutex
 
 	TimeArray [][]int
@@ -45,8 +47,15 @@ func makeNode(inputfile string) *Node {
 
 	ret.id = info.id
 
-	ret.log = make([]tweet, 1)
+	ret.log = make([][]tweet, info.totalNodes)
+	for i := 0; i < info.totalNodes; i++ {
+		ret.log[i] = make([]tweet, 0, 10)
+	}
 	ret.logMutex = &sync.Mutex{}
+
+	if _, err := ret.LoadTweets(staticLog); err != nil {
+		log.Fatal("welp")
+	}
 
 	ret.TimeArray = make([][]int, info.totalNodes)
 	for i := range ret.TimeArray {
@@ -64,19 +73,25 @@ func makeNode(inputfile string) *Node {
 	return ret
 }
 
-func (n *Node) LoadTweets(filename string) error {
-	_, err := os.Stat(filename)
+func (n *Node) LoadTweets(filename string) (bool, error) {
+	_, err := os.Stat(staticLog)
 	if os.IsNotExist(err) {
 		log.Println("LOG FILE NOT YET CREATED")
-		return nil
+		return false, nil
 	}
 
-	file, err := os.Open(filename)
+	file, err := ioutil.ReadFile(staticLog)
 	if err != nil {
-		log.Fatalln(err)
+		return false, err
 	}
 
-	return nil
+	n.logMutex.Lock()
+	defer n.logMutex.Unlock()
+	if err := json.Unmarshal(file, &n.log); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (n *Node) hasRec(msg tweet, k int) bool {
@@ -84,4 +99,14 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 	ret := n.TimeArray[k][msg.user] >= msg.counter
 	n.TimeMutex.Unlock()
 	return ret
+}
+
+//will generate messages that can be sent else were
+// but main purpose is to generate messages for all
+// other nodes
+// essentailly, you only can send out messages when
+//  there's a new tweet, so this requires that tweet.
+// I'll talk it over with Ian...
+func (n *Node) BroadCast(msg tweet) {
+	return
 }
