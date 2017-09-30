@@ -7,7 +7,12 @@ import (
 	"strings"
 )
 
-func InputHandler() {
+func TweetEvent(local *Node, message string) {
+	fmt.Println("hiiiii")
+	return
+}
+
+func InputHandler(local *Node) {
 	reader := bufio.NewReader(os.Stdin)
 	for true {
 		//done := make(chan bool)
@@ -19,6 +24,7 @@ func InputHandler() {
 			fmt.Println(message)
 			//userTweet := tweet{message, myIP, time.Now().UTC()}
 			//tweetUpdate(message, myIP)
+			TweetEvent(local, message)
 		} else if i := strings.Index(input, "view"); i == 0 {
 			fmt.Printf("View called\n")
 		} else if i := strings.Index(input, "block"); i == 0 {
