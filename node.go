@@ -37,12 +37,12 @@ func makeNode(inputfile string) *Node {
 	type startinfo struct {
 		id         int
 		totalNodes int
-		IPs        []string
+		IPs        map[string]string
 	}
 
 	var info startinfo
 	if err := json.Unmarshal(file, &info); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	ret.id = info.id

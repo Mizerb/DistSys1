@@ -23,6 +23,6 @@ func main() {
 	}
 
 	local := makeNode(starting)
-	InputHandler()
+	InputHandler(local)
 	return
 }
