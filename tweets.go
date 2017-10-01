@@ -25,6 +25,7 @@ type tweet struct {
 	clock    time.Time
 	counter  int
 	event    int
+	//event is the type (tweet,insert,delete)
 }
 
 func (n tweet) getTimestamp() time.Time {

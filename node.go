@@ -44,13 +44,25 @@ func makeNode(inputfile string) *Node {
 		IPs        map[string]string
 	}
 
+	//For unexplainable reasons, the parsing wasn't working right for the first three ints. Ian defaulted to the example provided online to remedy it
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal(file, &dat); err != nil {
+		panic(err)
+	}
+	//fmt.Println(dat)
+
 	var info startinfo //Deserialize the JSON
 	if err := json.Unmarshal(file, &info); err != nil {
 		log.Fatal(err)
 	}
+	info.id = int(dat["id"].(float64))
+	info.localport = int(dat["localport"].(float64))
+	info.totalNodes = int(dat["totalNodes"].(float64))
 
 	ret.listenPort = info.localport
 	ret.id = info.id
+	//fmt.Println(info)
 
 	ret.log = make([][]tweet, info.totalNodes)
 	for i := 0; i < info.totalNodes; i++ {
@@ -69,9 +81,9 @@ func makeNode(inputfile string) *Node {
 	}
 
 	ret.TimeArray = make([][]int, info.totalNodes)
-	/*for i := range ret.TimeArray {
-		ret.TimeArray[i] = make([]int, info.totalNodes)
-	}*/
+	//for i := range ret.TimeArray {
+	//	ret.TimeArray[i] = make([]int, info.totalNodes)
+	//}
 	ret.TimeMutex = &sync.Mutex{}
 
 	ret.blocks = make(map[int]int)
