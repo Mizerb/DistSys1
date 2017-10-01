@@ -25,7 +25,8 @@ type Node struct {
 	blocks     map[int]int
 	blockMutex *sync.Mutex
 
-	IPtargets map[int]string
+	listenPort int
+	IPtargets  map[int]string
 }
 
 func makeNode(inputfile string) *Node {
@@ -38,6 +39,7 @@ func makeNode(inputfile string) *Node {
 
 	type startinfo struct {
 		id         int
+		localport  int
 		totalNodes int
 		IPs        map[string]string
 	}
@@ -47,6 +49,7 @@ func makeNode(inputfile string) *Node {
 		log.Fatal(err)
 	}
 
+	ret.listenPort = info.localport
 	ret.id = info.id
 
 	ret.log = make([][]tweet, info.totalNodes)
@@ -66,9 +69,9 @@ func makeNode(inputfile string) *Node {
 	}
 
 	ret.TimeArray = make([][]int, info.totalNodes)
-	for i := range ret.TimeArray {
+	/*for i := range ret.TimeArray {
 		ret.TimeArray[i] = make([]int, info.totalNodes)
-	}
+	}*/
 	ret.TimeMutex = &sync.Mutex{}
 
 	ret.blocks = make(map[int]int)
@@ -104,15 +107,15 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 
 func (n *Node) writeLog() {
 	n.logMutex.Lock()
-	defer n.logMutex.Unlock()
-	logfile, err := os.Open(staticLog)
-	if err != nil {
-		log.Fatal(err)
-	}
 	logBytes, err := json.Marshal(n.log)
+	defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
 		//might not want fatal here...
+	}
+	err = ioutil.WriteFile(staticLog, logBytes, 0644)
+	if err != nil {
+		log.Fatalln("Failed to write to staticlog")
 	}
 
 }
@@ -134,14 +137,32 @@ func (n *Node) BroadCast(msg tweet) {
 	return
 }
 
-func (n *Node) receive(msg message) {
+func (n *Node) receive(msg *message) {
+	//Figure which events are actually new
+	newEvent := make([][]tweet, len(n.log))
+	for i := range n.log {
+		for j := range msg.events[i] {
+			if !(n.hasRec(msg.events[i][j], n.id)) {
+				newEvent[i] = append(newEvent[i], msg.events[i][j])
+			}
+		}
+	}
 
+	//update dictonary
+	//
+
+	//update the time array
 	n.TimeMutex.Lock()
+	for k := range n.TimeArray[n.id] {
+		n.TimeArray[n.id][k] = maxInt(n.TimeArray[n.id][k], msg.Ti[msg.sendID][k])
+	}
 	for i := range n.TimeArray {
 		for j := range n.TimeArray[i] {
 			n.TimeArray[i][j] = maxInt(n.TimeArray[i][j], msg.Ti[i][j])
 		}
 	}
-
 	n.TimeMutex.Unlock()
+
+	//update local log
+
 }

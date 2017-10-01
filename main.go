@@ -23,6 +23,7 @@ func main() {
 	}
 
 	local := makeNode(starting)
+	go listen(local)
 	InputHandler(local)
 	return
 }

@@ -9,6 +9,7 @@ import (
 type message struct {
 	Ti     [][]int
 	events [][]tweet
+	sendID int
 }
 
 const ( //iota is reset to 0
@@ -23,6 +24,7 @@ type tweet struct {
 	follower int
 	clock    time.Time
 	counter  int
+	event    int
 }
 
 func (n tweet) getTimestamp() time.Time {
@@ -49,4 +51,11 @@ func getTweets(msg []byte) ([]tweet, error) {
 		return nil, err
 	}
 	return ret, nil
+}
+
+func maxInt(x int, y int) int {
+	if x > y {
+		return x
+	}
+	return y
 }

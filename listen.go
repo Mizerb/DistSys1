@@ -1,9 +1,14 @@
 package main
 
-import "net"
+import (
+	"encoding/json"
+	"log"
+	"net"
+	"strconv"
+)
 
-func listen(port string, serv *Node) {
-	ln, err := net.Listen("tcp", port)
+func listen(serv *Node) {
+	ln, err := net.Listen("tcp", strconv.Itoa(serv.listenPort))
 	if err != nil {
 		//crappp
 	}
@@ -17,6 +22,20 @@ func listen(port string, serv *Node) {
 }
 
 func handleConn(conn net.Conn, serv *Node) {
+	defer conn.Close()
+	var data []byte
+	_, err := conn.Read(data)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	var msg *message
+	err = json.Unmarshal(data, msg)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
+	serv.receive(msg)
 	return
 }
