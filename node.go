@@ -9,6 +9,7 @@ import (
 )
 
 const staticLog = "./localLog.json"
+const staticDict = "./localDict.json"
 
 type Node struct {
 	id int
@@ -22,7 +23,8 @@ type Node struct {
 	TimeArray [][]int
 	TimeMutex *sync.Mutex
 
-	blocks     map[int]int
+	blocks map[int]int //I guess I'm going to have to do an array of this, but I  don't want to
+	// Let It Be Known To All Who Read the Comments, I Didn't Want This
 	blockMutex *sync.Mutex
 
 	listenPort int
@@ -77,6 +79,16 @@ func makeNode(inputfile string) *Node {
 	ret.blocks = make(map[int]int)
 	ret.blockMutex = &sync.Mutex{}
 
+	check, err := ret.LoadDict()
+	if err != nil || check == false {
+		//create static dict
+		f, err := os.Create(staticDict)
+		if err != nil {
+			log.Fatal("Failed to create staticDict")
+		}
+		f.Close()
+	}
+
 	ret.IPtargets = make(map[int]string)
 
 	ret.Ci = 0
@@ -105,6 +117,25 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 	return true, nil
 }
 
+func (n *Node) LoadDict() (bool, error) {
+	_, err := os.Stat(staticDict)
+	if os.IsNotExist(err) {
+		log.Panicln("DICT FILE NOT YET CREATED")
+		return false, nil
+	}
+
+	file, err := ioutil.ReadFile(staticDict)
+	if err != nil {
+		return false, err
+	}
+	n.blockMutex.Lock()
+	defer n.blockMutex.Unlock()
+	if err := json.Unmarshal(file, &n.blocks); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (n *Node) writeLog() {
 	n.logMutex.Lock()
 	logBytes, err := json.Marshal(n.log)
@@ -117,7 +148,21 @@ func (n *Node) writeLog() {
 	if err != nil {
 		log.Fatalln("Failed to write to staticlog")
 	}
+}
 
+func (n *Node) writeDict() {
+	n.blockMutex.Lock()
+	defer n.blockMutex.Unlock()
+	writeBytes, err := json.Marshal(n.blocks)
+	if err != nil {
+		log.Fatalf("failed to Marshel to static Dict\n")
+	}
+	err = ioutil.WriteFile(staticDict, writeBytes, 0644)
+	if err != nil {
+		//well shit,
+		log.Fatalln("Failed to write to static dict")
+		//
+	}
 }
 
 func (n *Node) hasRec(msg tweet, k int) bool {
@@ -137,6 +182,47 @@ func (n *Node) BroadCast(msg tweet) {
 	return
 }
 
+/*
+The logic behind this functiion starts with inserting and deleting things from
+the blocks dict, but where does it go from there
+The bit about removing things from the record is important
+But I'll need to serach through events to figure out which one I need to remove it from
+which will be a pain
+
+Weird twists,
+2 block commands
+wait, shit what if a user block more than 1 person..
+welcom to slice town, population me...
+*/
+func (n *Node) UpdateDict(events [][]tweet) {
+	for _, stuff := range events {
+		for _, record := range stuff {
+			if record.event == INSERT {
+				//insert into dict I guess
+				//yeah,
+				n.blocks[record.user] = record.follower
+			} else if record.event == DELETE {
+				//handle VERY differently.
+				// like I have to think with a a peice of paper
+				// Because I can't just add it if it already exists
+
+			}
+		}
+	}
+}
+
+func (n *Node) UpdateLog(events [][]tweet) {
+	//
+	n.logMutex.Lock()
+	for i, noderec := range events {
+		for _, record := range noderec {
+			n.log[i] = append(n.log[i], record)
+		}
+	}
+	n.logMutex.Unlock()
+	n.writeLog()
+}
+
 func (n *Node) receive(msg *message) {
 	//Figure which events are actually new
 	newEvent := make([][]tweet, len(n.log))
@@ -149,7 +235,9 @@ func (n *Node) receive(msg *message) {
 	}
 
 	//update dictonary
-	//
+	// crapppp
+
+	n.UpdateDict(newEvent)
 
 	//update the time array
 	n.TimeMutex.Lock()
@@ -164,5 +252,7 @@ func (n *Node) receive(msg *message) {
 	n.TimeMutex.Unlock()
 
 	//update local log
+
+	n.UpdateLog(newEvent)
 
 }
