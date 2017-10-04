@@ -30,6 +30,7 @@ func InputHandler(local *Node) {
 		} else if i := strings.Index(input, "block"); i == 0 {
 			username := input[6 : len(input)-1]
 			fmt.Printf("Block called on %s\n", username)
+			//create new tweet with type set to block, add to local dictonary
 		} else if i := strings.Index(input, "unblock"); i == 0 {
 			username := input[8 : len(input)-1]
 			fmt.Printf("Unblock called on %s\n", username)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -16,13 +17,17 @@ Next To Do:
 */
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("First argument must be configuration file")
+	}
 	starting := os.Args[1]
 
 	if _, err := os.Stat(starting); os.IsNotExist(err) {
-		log.Fatalln("First arugment must configuration file")
+		log.Fatalln("Unable to open configuration file\nPlease confirm it's a json")
 	}
 
-	local := makeNode(starting)
+	local := makeNode(starting) // load in any stored files
+	// With any luck things won't crash at bad times
 	go listen(local)
 	InputHandler(local)
 	return
