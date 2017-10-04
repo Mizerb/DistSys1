@@ -137,9 +137,9 @@ func (n *Node) LoadDict() (bool, error) {
 }
 
 func (n *Node) writeLog() {
-	n.logMutex.Lock()
+	//n.logMutex.Lock()
 	logBytes, err := json.Marshal(n.log)
-	defer n.logMutex.Unlock()
+	//defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
 		//might not want fatal here...
@@ -151,8 +151,8 @@ func (n *Node) writeLog() {
 }
 
 func (n *Node) writeDict() {
-	n.blockMutex.Lock()
-	defer n.blockMutex.Unlock()
+	//n.blockMutex.Lock()
+	//defer n.blockMutex.Unlock()
 	writeBytes, err := json.Marshal(n.blocks)
 	if err != nil {
 		log.Fatalf("failed to Marshel to static Dict\n")
@@ -180,79 +180,4 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 // I'll talk it over with Ian...
 func (n *Node) BroadCast(msg tweet) {
 	return
-}
-
-/*
-The logic behind this functiion starts with inserting and deleting things from
-the blocks dict, but where does it go from there
-The bit about removing things from the record is important
-But I'll need to serach through events to figure out which one I need to remove it from
-which will be a pain
-
-Weird twists,
-2 block commands
-wait, shit what if a user block more than 1 person..
-welcom to slice town, population me...
-*/
-func (n *Node) UpdateDict(events [][]tweet) {
-	for _, stuff := range events {
-		for _, record := range stuff {
-			if record.event == INSERT {
-				//insert into dict I guess
-				//yeah,
-				n.blocks[record.user] = record.follower
-			} else if record.event == DELETE {
-				//handle VERY differently.
-				// like I have to think with a a peice of paper
-				// Because I can't just add it if it already exists
-
-			}
-		}
-	}
-}
-
-func (n *Node) UpdateLog(events [][]tweet) {
-	//
-	n.logMutex.Lock()
-	for i, noderec := range events {
-		for _, record := range noderec {
-			n.log[i] = append(n.log[i], record)
-		}
-	}
-	n.logMutex.Unlock()
-	n.writeLog()
-}
-
-func (n *Node) receive(msg *message) {
-	//Figure which events are actually new
-	newEvent := make([][]tweet, len(n.log))
-	for i := range n.log {
-		for j := range msg.events[i] {
-			if !(n.hasRec(msg.events[i][j], n.id)) {
-				newEvent[i] = append(newEvent[i], msg.events[i][j])
-			}
-		}
-	}
-
-	//update dictonary
-	// crapppp
-
-	n.UpdateDict(newEvent)
-
-	//update the time array
-	n.TimeMutex.Lock()
-	for k := range n.TimeArray[n.id] {
-		n.TimeArray[n.id][k] = maxInt(n.TimeArray[n.id][k], msg.Ti[msg.sendID][k])
-	}
-	for i := range n.TimeArray {
-		for j := range n.TimeArray[i] {
-			n.TimeArray[i][j] = maxInt(n.TimeArray[i][j], msg.Ti[i][j])
-		}
-	}
-	n.TimeMutex.Unlock()
-
-	//update local log
-
-	n.UpdateLog(newEvent)
-
 }
