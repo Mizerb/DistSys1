@@ -9,6 +9,7 @@ import (
 )
 
 const staticLog = "./localLog.json"
+const staticDict = "./localDict.json"
 
 type Node struct {
 	id int
@@ -22,7 +23,8 @@ type Node struct {
 	TimeArray [][]int
 	TimeMutex *sync.Mutex
 
-	blocks     map[int]int
+	blocks map[int]int //I guess I'm going to have to do an array of this, but I  don't want to
+	// Let It Be Known To All Who Read the Comments, I Didn't Want This
 	blockMutex *sync.Mutex
 
 	listenPort int
@@ -44,25 +46,13 @@ func makeNode(inputfile string) *Node {
 		IPs        map[string]string
 	}
 
-	//For unexplainable reasons, the parsing wasn't working right for the first three ints. Ian defaulted to the example provided online to remedy it
-
-	var dat map[string]interface{}
-	if err := json.Unmarshal(file, &dat); err != nil {
-		panic(err)
-	}
-	//fmt.Println(dat)
-
 	var info startinfo //Deserialize the JSON
 	if err := json.Unmarshal(file, &info); err != nil {
 		log.Fatal(err)
 	}
-	info.id = int(dat["id"].(float64))
-	info.localport = int(dat["localport"].(float64))
-	info.totalNodes = int(dat["totalNodes"].(float64))
 
 	ret.listenPort = info.localport
 	ret.id = info.id
-	//fmt.Println(info)
 
 	ret.log = make([][]tweet, info.totalNodes)
 	for i := 0; i < info.totalNodes; i++ {
@@ -81,13 +71,23 @@ func makeNode(inputfile string) *Node {
 	}
 
 	ret.TimeArray = make([][]int, info.totalNodes)
-	//for i := range ret.TimeArray {
-	//	ret.TimeArray[i] = make([]int, info.totalNodes)
-	//}
+	/*for i := range ret.TimeArray {
+		ret.TimeArray[i] = make([]int, info.totalNodes)
+	}*/
 	ret.TimeMutex = &sync.Mutex{}
 
 	ret.blocks = make(map[int]int)
 	ret.blockMutex = &sync.Mutex{}
+
+	check, err := ret.LoadDict()
+	if err != nil || check == false {
+		//create static dict
+		f, err := os.Create(staticDict)
+		if err != nil {
+			log.Fatal("Failed to create staticDict")
+		}
+		f.Close()
+	}
 
 	ret.IPtargets = make(map[int]string)
 
@@ -117,10 +117,29 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 	return true, nil
 }
 
+func (n *Node) LoadDict() (bool, error) {
+	_, err := os.Stat(staticDict)
+	if os.IsNotExist(err) {
+		log.Panicln("DICT FILE NOT YET CREATED")
+		return false, nil
+	}
+
+	file, err := ioutil.ReadFile(staticDict)
+	if err != nil {
+		return false, err
+	}
+	n.blockMutex.Lock()
+	defer n.blockMutex.Unlock()
+	if err := json.Unmarshal(file, &n.blocks); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (n *Node) writeLog() {
-	n.logMutex.Lock()
+	//n.logMutex.Lock()
 	logBytes, err := json.Marshal(n.log)
-	defer n.logMutex.Unlock()
+	//defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
 		//might not want fatal here...
@@ -129,7 +148,21 @@ func (n *Node) writeLog() {
 	if err != nil {
 		log.Fatalln("Failed to write to staticlog")
 	}
+}
 
+func (n *Node) writeDict() {
+	//n.blockMutex.Lock()
+	//defer n.blockMutex.Unlock()
+	writeBytes, err := json.Marshal(n.blocks)
+	if err != nil {
+		log.Fatalf("failed to Marshel to static Dict\n")
+	}
+	err = ioutil.WriteFile(staticDict, writeBytes, 0644)
+	if err != nil {
+		//well shit,
+		log.Fatalln("Failed to write to static dict")
+		//
+	}
 }
 
 func (n *Node) hasRec(msg tweet, k int) bool {
@@ -147,34 +180,4 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 // I'll talk it over with Ian...
 func (n *Node) BroadCast(msg tweet) {
 	return
-}
-
-func (n *Node) receive(msg *message) {
-	//Figure which events are actually new
-	newEvent := make([][]tweet, len(n.log))
-	for i := range n.log {
-		for j := range msg.events[i] {
-			if !(n.hasRec(msg.events[i][j], n.id)) {
-				newEvent[i] = append(newEvent[i], msg.events[i][j])
-			}
-		}
-	}
-
-	//update dictonary
-	//
-
-	//update the time array
-	n.TimeMutex.Lock()
-	for k := range n.TimeArray[n.id] {
-		n.TimeArray[n.id][k] = maxInt(n.TimeArray[n.id][k], msg.Ti[msg.sendID][k])
-	}
-	for i := range n.TimeArray {
-		for j := range n.TimeArray[i] {
-			n.TimeArray[i][j] = maxInt(n.TimeArray[i][j], msg.Ti[i][j])
-		}
-	}
-	n.TimeMutex.Unlock()
-
-	//update local log
-
 }
