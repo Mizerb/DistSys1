@@ -5,9 +5,20 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
-func TweetEvent(localN *Node, message string) *Node {
+/*
+type Rankings struct {
+	Keyword  string `json:"keyword"`
+	GetCount uint32 `json:"get_count"`
+	Engine   string `json:"engine"`
+	Locale   string `json:"locale"`
+	Mobile   bool   `json:"mobile"`
+}
+*/
+
+func (localN *Node) TweetEvent(message string) *Node {
 	//fmt.Println("hiiiii")
 	//get the id of
 	/*file, err := ioutil.ReadFile("./entryData.json")
@@ -17,16 +28,32 @@ func TweetEvent(localN *Node, message string) *Node {
 	if err := json.Unmarshal(file, &localN.log); err != nil {
 		return
 	}*/
-	//twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
+	twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
 
-	//fmt.Println(twt.clock)
-	//fmt.Println(localN.Ci)
-	//update the tweets in memory and in the physical log
-	//fmt.Println(localN.log[localN.id])
-	fmt.Println(localN.log)
+	fmt.Println("Current messages in log:")
+	for i := 0; i < len(localN.log[localN.id]); i++ {
+		fmt.Println(" - ", localN.log[localN.id][i].message)
+	}
+	fmt.Println("")
 
-	//localN.log[localN.id] = append(localN.log[localN.id], twt)
-	fmt.Println(localN.log[localN.id])
+	//update the tweet in memory
+	localN.log[localN.id] = append(localN.log[localN.id], twt)
+
+	//update the tweet in the physical log
+	//THIS IS A TEST
+
+	/*
+		var jsonBlob = []byte(`{"keyword":"hipaa compliance form", "get_count":157, "engine":"google", "locale":"en-us", "mobile":false}`)
+		rankings := Rankings{}
+		err := json.Unmarshal(jsonBlob, &rankings)
+		if err != nil {
+			panic(err)
+		}
+		rankingsJson, _ := json.Marshal(rankings)
+		err = ioutil.WriteFile(staticLog, rankingsJson, 0644)
+		fmt.Printf("%+v", rankings)
+	*/
+
 	return localN
 }
 
@@ -39,11 +66,11 @@ func InputHandler(local *Node) {
 
 		if i := strings.Index(input, "tweet"); i == 0 {
 			message := input[6 : len(input)-1]
-			fmt.Println(message)
+			fmt.Println("Tweet Called")
 			//userTweet := tweet{message, myIP, time.Now().UTC()}
 			//tweetUpdate(message, myIP)
 			//local := TweetEvent(local, message)
-			TweetEvent(local, message)
+			local.TweetEvent(message)
 		} else if i := strings.Index(input, "view"); i == 0 {
 			fmt.Printf("View called\n")
 		} else if i := strings.Index(input, "block"); i == 0 {
