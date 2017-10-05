@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 )
 
 func TweetEvent(localN *Node, message string) *Node {
@@ -18,13 +17,15 @@ func TweetEvent(localN *Node, message string) *Node {
 	if err := json.Unmarshal(file, &localN.log); err != nil {
 		return
 	}*/
-	twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
+	//twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
+
 	//fmt.Println(twt.clock)
 	//fmt.Println(localN.Ci)
 	//update the tweets in memory and in the physical log
 	//fmt.Println(localN.log[localN.id])
-	//fmt.Println(localN.log)
-	localN.log[localN.id] = append(localN.log[localN.id], twt)
+	fmt.Println(localN.log)
+
+	//localN.log[localN.id] = append(localN.log[localN.id], twt)
 	fmt.Println(localN.log[localN.id])
 	return localN
 }

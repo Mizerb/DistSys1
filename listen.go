@@ -38,6 +38,6 @@ func handleConn(conn net.Conn, serv *Node) {
 		return
 	}
 
-	serv.receive(msg)
+	//serv.receive(msg)
 	return
 }

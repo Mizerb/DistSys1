@@ -51,6 +51,16 @@ func makeNode(inputfile string) *Node {
 		log.Fatal(err)
 	}
 
+	//To get the id, localport, and totalNodes, this separate object needs to be used
+	var dat map[string]interface{}
+	if err := json.Unmarshal(file, &dat); err != nil {
+		panic(err)
+	}
+
+	info.id = int(dat["id"].(float64))
+	info.localport = int(dat["localport"].(float64))
+	info.totalNodes = int(dat["totalNodes"].(float64))
+
 	ret.listenPort = info.localport
 	ret.id = info.id
 
@@ -120,7 +130,8 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 func (n *Node) LoadDict() (bool, error) {
 	_, err := os.Stat(staticDict)
 	if os.IsNotExist(err) {
-		log.Panicln("DICT FILE NOT YET CREATED")
+		//log.Panicln("DICT FILE NOT YET CREATED")
+		log.Println("DICT FILE NOT YET CREATED")
 		return false, nil
 	}
 
