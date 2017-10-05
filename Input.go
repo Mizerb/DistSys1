@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func TweetEvent(localN *Node, message string) {
-	fmt.Println("hiiiii")
+func TweetEvent(localN *Node, message string) *Node {
+	//fmt.Println("hiiiii")
 	//get the id of
 	/*file, err := ioutil.ReadFile("./entryData.json")
 	if err != nil {
@@ -19,11 +19,14 @@ func TweetEvent(localN *Node, message string) {
 		return
 	}*/
 	twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
-	fmt.Println(twt.clock)
-	fmt.Println(twt.user)
+	//fmt.Println(twt.clock)
+	//fmt.Println(localN.Ci)
 	//update the tweets in memory and in the physical log
+	//fmt.Println(localN.log[localN.id])
+	//fmt.Println(localN.log)
+	localN.log[localN.id] = append(localN.log[localN.id], twt)
 	fmt.Println(localN.log[localN.id])
-	return
+	return localN
 }
 
 func InputHandler(local *Node) {
@@ -38,12 +41,14 @@ func InputHandler(local *Node) {
 			fmt.Println(message)
 			//userTweet := tweet{message, myIP, time.Now().UTC()}
 			//tweetUpdate(message, myIP)
+			//local := TweetEvent(local, message)
 			TweetEvent(local, message)
 		} else if i := strings.Index(input, "view"); i == 0 {
 			fmt.Printf("View called\n")
 		} else if i := strings.Index(input, "block"); i == 0 {
 			username := input[6 : len(input)-1]
 			fmt.Printf("Block called on %s\n", username)
+			//create new tweet with type set to block, add to local dictonary
 		} else if i := strings.Index(input, "unblock"); i == 0 {
 			username := input[8 : len(input)-1]
 			fmt.Printf("Unblock called on %s\n", username)
