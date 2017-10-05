@@ -26,9 +26,8 @@ func main() {
 		log.Fatalln("Unable to open configuration file\nPlease confirm it's a json")
 	}
 
-	local := makeNode(starting) // load in any stored files
-	// With any luck things won't crash at bad times
-	go listen(local)
+	local := makeNode(starting)
+	//go listen(local)
 	InputHandler(local)
 	return
 }

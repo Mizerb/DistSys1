@@ -5,10 +5,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
-func TweetEvent(local *Node, message string) {
+func TweetEvent(localN *Node, message string) {
 	fmt.Println("hiiiii")
+	//get the id of
+	/*file, err := ioutil.ReadFile("./entryData.json")
+	if err != nil {
+		return
+	}
+	if err := json.Unmarshal(file, &localN.log); err != nil {
+		return
+	}*/
+	twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
+	fmt.Println(twt.clock)
+	fmt.Println(twt.user)
+	//update the tweets in memory and in the physical log
+	fmt.Println(localN.log[localN.id])
 	return
 }
 
@@ -16,7 +30,7 @@ func InputHandler(local *Node) {
 	reader := bufio.NewReader(os.Stdin)
 	for true {
 		//done := make(chan bool)
-		fmt.Println("Please enter a Command:")
+		fmt.Printf("Please enter a Command: ")
 		input, _ := reader.ReadString('\n')
 
 		if i := strings.Index(input, "tweet"); i == 0 {
