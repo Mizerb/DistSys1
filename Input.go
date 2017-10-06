@@ -28,16 +28,16 @@ func (localN *Node) TweetEvent(message string) *Node {
 	if err := json.Unmarshal(file, &localN.log); err != nil {
 		return
 	}*/
-	twt := tweet{message, localN.id, localN.id, time.Now().UTC(), localN.Ci, 2}
+	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 2}
 
 	fmt.Println("Current messages in log:")
-	for i := 0; i < len(localN.log[localN.id]); i++ {
-		fmt.Println(" - ", localN.log[localN.id][i].Message)
+	for i := 0; i < len(localN.Log[localN.Id]); i++ {
+		fmt.Println(" - ", localN.Log[localN.Id][i].Message)
 	}
 	fmt.Println("")
 
 	//update the tweet in memory
-	localN.log[localN.id] = append(localN.log[localN.id], twt)
+	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
 
 	localN.writeLog()
 	//update the tweet in the physical log

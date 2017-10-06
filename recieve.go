@@ -24,13 +24,13 @@ func (n *Node) UpdateDict(events [][]tweet) {
 				// for which I am sorry, but I have no choose
 				// I wonder if someone's implemented that yet
 				// would check but I don't have internet
-				n.blocks[record.User] = record.Follower
+				n.Blocks[record.User] = record.Follower
 			} else if record.Event == DELETE {
 				//handle VERY differently.
 				// like I have to think with a a peice of paper
 				// Because I can't just add it if it already exists
 
-				delete(n.blocks, record.User)
+				delete(n.Blocks, record.User)
 				//sure
 			}
 		}
@@ -46,7 +46,7 @@ func (n *Node) UpdateLog(events [][]tweet) {
 	//n.logMutex.Lock()
 	for i, noderec := range events {
 		for _, record := range noderec {
-			n.log[i] = append(n.log[i], record)
+			n.Log[i] = append(n.Log[i], record)
 		}
 	}
 	//n.logMutex.Unlock()
@@ -58,20 +58,20 @@ func (n *Node) receive(msg *message) {
 	// because if they occur any lower
 	// one thread might change the clocks before another adds to the logs.
 	// which would be ... very bad
-	n.blockMutex.Lock()
-	defer n.blockMutex.Unlock()
+	n.BlockMutex.Lock()
+	defer n.BlockMutex.Unlock()
 
-	n.logMutex.Lock()
-	defer n.logMutex.Unlock()
+	n.LogMutex.Lock()
+	defer n.LogMutex.Unlock()
 
 	n.TimeMutex.Lock()
 	defer n.TimeMutex.Unlock()
 	//Figure which events are actually new
-	newEvent := make([][]tweet, len(n.log))
-	for i := range n.log {
-		for j := range msg.events[i] {
-			if !(n.hasRec(msg.events[i][j], n.id)) {
-				newEvent[i] = append(newEvent[i], msg.events[i][j])
+	newEvent := make([][]tweet, len(n.Log))
+	for i := range n.Log {
+		for j := range msg.Events[i] {
+			if !(n.hasRec(msg.Events[i][j], n.Id)) {
+				newEvent[i] = append(newEvent[i], msg.Events[i][j])
 			}
 		}
 	}
@@ -83,8 +83,8 @@ func (n *Node) receive(msg *message) {
 
 	//update the time array
 	//n.TimeMutex.Lock()
-	for k := range n.TimeArray[n.id] {
-		n.TimeArray[n.id][k] = maxInt(n.TimeArray[n.id][k], msg.Ti[msg.sendID][k])
+	for k := range n.TimeArray[n.Id] {
+		n.TimeArray[n.Id][k] = maxInt(n.TimeArray[n.Id][k], msg.Ti[msg.SendID][k])
 	}
 	for i := range n.TimeArray {
 		for j := range n.TimeArray[i] {

@@ -8,8 +8,8 @@ import (
 
 type message struct {
 	Ti     [][]int
-	events [][]tweet
-	sendID int
+	Events [][]tweet
+	SendID int
 }
 
 const ( //iota is reset to 0

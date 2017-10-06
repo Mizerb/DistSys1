@@ -8,7 +8,7 @@ import (
 )
 
 func listen(serv *Node) {
-	ln, err := net.Listen("tcp", strconv.Itoa(serv.listenPort))
+	ln, err := net.Listen("tcp", strconv.Itoa(serv.ListenPort))
 	defer ln.Close()
 	if err != nil {
 		//crappp

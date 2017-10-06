@@ -14,7 +14,7 @@ func TestWriteLog(t *testing.T) {
 	node := makeNode("entryData.json")
 
 	msg := tweet{User: 0, Event: 0, Message: "haha"}
-	node.log[0] = append(node.log[0], msg)
+	node.Log[0] = append(node.Log[0], msg)
 	node.writeLog()
 
 	data, err := ioutil.ReadFile(staticLog)
@@ -23,17 +23,23 @@ func TestWriteLog(t *testing.T) {
 		t.Fail()
 	}
 	var check [][]tweet
-	err = json.Unmarshal(data, check)
+	err = json.Unmarshal(data, &check)
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
-	if len(check) != len(node.log) {
+	if len(check) != len(node.Log) {
 		fmt.Println("log and file not same")
+		t.Fail()
 	}
-	for i := range node.log {
-		for j := range node.log[i] {
-			if node.log[i][j].Message != check[i][j].Message {
+
+	if len(check[0]) != len(node.Log[0]) {
+		fmt.Println("log and file not same")
+		t.Fail()
+	}
+	for i := range node.Log {
+		for j := range node.Log[i] {
+			if node.Log[i][j].Message != check[i][j].Message {
 				fmt.Println("log and file dont' contain same data")
 				t.Fail()
 			}

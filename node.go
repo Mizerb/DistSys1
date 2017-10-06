@@ -12,22 +12,22 @@ const staticLog = "./localLog.json"
 const staticDict = "./localDict.json"
 
 type Node struct {
-	id int
+	Id int
 	Ci int
 
-	userName string
+	UserName string
 
-	log      [][]tweet
-	logMutex *sync.Mutex
+	Log      [][]tweet
+	LogMutex *sync.Mutex
 
 	TimeArray [][]int
 	TimeMutex *sync.Mutex
 
-	blocks map[int]int //I guess I'm going to have to do an array of this, but I  don't want to
+	Blocks map[int]int //I guess I'm going to have to do an array of this, but I  don't want to
 	// Let It Be Known To All Who Read the Comments, I Didn't Want This
-	blockMutex *sync.Mutex
+	BlockMutex *sync.Mutex
 
-	listenPort int
+	ListenPort int
 	IPtargets  map[int]string
 }
 
@@ -40,9 +40,9 @@ func makeNode(inputfile string) *Node {
 	}
 
 	type startinfo struct {
-		id         int
-		localport  int
-		totalNodes int
+		Id         int
+		Localport  int
+		TotalNodes int
 		IPs        map[string]string
 	}
 
@@ -57,18 +57,18 @@ func makeNode(inputfile string) *Node {
 		panic(err)
 	}
 
-	info.id = int(dat["id"].(float64))
-	info.localport = int(dat["localport"].(float64))
-	info.totalNodes = int(dat["totalNodes"].(float64))
+	info.Id = int(dat["Id"].(float64))
+	info.Localport = int(dat["Localport"].(float64))
+	info.TotalNodes = int(dat["TotalNodes"].(float64))
 
-	ret.listenPort = info.localport
-	ret.id = info.id
+	ret.ListenPort = info.Localport
+	ret.Id = info.Id
 
-	ret.log = make([][]tweet, info.totalNodes)
-	for i := 0; i < info.totalNodes; i++ {
-		ret.log[i] = make([]tweet, 0, 10)
+	ret.Log = make([][]tweet, info.TotalNodes)
+	for i := 0; i < info.TotalNodes; i++ {
+		ret.Log[i] = make([]tweet, 0, 10)
 	}
-	ret.logMutex = &sync.Mutex{}
+	ret.LogMutex = &sync.Mutex{}
 
 	if check, err := ret.LoadTweets(staticLog); err != nil || check == false {
 		//log.Fatal("welp")
@@ -80,14 +80,14 @@ func makeNode(inputfile string) *Node {
 		f.Close()
 	}
 
-	ret.TimeArray = make([][]int, info.totalNodes)
+	ret.TimeArray = make([][]int, info.TotalNodes)
 	/*for i := range ret.TimeArray {
 		ret.TimeArray[i] = make([]int, info.totalNodes)
 	}*/
 	ret.TimeMutex = &sync.Mutex{}
 
-	ret.blocks = make(map[int]int)
-	ret.blockMutex = &sync.Mutex{}
+	ret.Blocks = make(map[int]int)
+	ret.BlockMutex = &sync.Mutex{}
 
 	check, err := ret.LoadDict()
 	if err != nil || check == false {
@@ -118,9 +118,9 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 		return false, err
 	}
 
-	n.logMutex.Lock()
-	defer n.logMutex.Unlock()
-	if err := json.Unmarshal(file, &n.log); err != nil {
+	n.LogMutex.Lock()
+	defer n.LogMutex.Unlock()
+	if err := json.Unmarshal(file, &n.Log); err != nil {
 		return false, err
 	}
 
@@ -139,9 +139,9 @@ func (n *Node) LoadDict() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	n.blockMutex.Lock()
-	defer n.blockMutex.Unlock()
-	if err := json.Unmarshal(file, &n.blocks); err != nil {
+	n.BlockMutex.Lock()
+	defer n.BlockMutex.Unlock()
+	if err := json.Unmarshal(file, &n.Blocks); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -149,7 +149,7 @@ func (n *Node) LoadDict() (bool, error) {
 
 func (n *Node) writeLog() {
 	//n.logMutex.Lock()
-	logBytes, err := json.Marshal(n.log)
+	logBytes, err := json.Marshal(n.Log)
 	//defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
@@ -164,7 +164,7 @@ func (n *Node) writeLog() {
 func (n *Node) writeDict() {
 	//n.blockMutex.Lock()
 	//defer n.blockMutex.Unlock()
-	writeBytes, err := json.Marshal(n.blocks)
+	writeBytes, err := json.Marshal(n.Blocks)
 	if err != nil {
 		log.Fatalf("failed to Marshel to static Dict\n")
 	}
