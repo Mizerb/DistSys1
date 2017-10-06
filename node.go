@@ -178,7 +178,7 @@ func (n *Node) writeDict() {
 
 func (n *Node) hasRec(msg tweet, k int) bool {
 	n.TimeMutex.Lock()
-	ret := n.TimeArray[k][msg.user] >= msg.counter
+	ret := n.TimeArray[k][msg.User] >= msg.Counter
 	n.TimeMutex.Unlock()
 	return ret
 }

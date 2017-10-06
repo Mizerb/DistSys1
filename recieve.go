@@ -15,7 +15,7 @@ welcom to slice town, population me...
 func (n *Node) UpdateDict(events [][]tweet) {
 	for _, stuff := range events {
 		for _, record := range stuff {
-			if record.event == INSERT {
+			if record.Event == INSERT {
 				//insert into dict I guess
 				//yeah,
 
@@ -24,13 +24,13 @@ func (n *Node) UpdateDict(events [][]tweet) {
 				// for which I am sorry, but I have no choose
 				// I wonder if someone's implemented that yet
 				// would check but I don't have internet
-				n.blocks[record.user] = record.follower
-			} else if record.event == DELETE {
+				n.blocks[record.User] = record.Follower
+			} else if record.Event == DELETE {
 				//handle VERY differently.
 				// like I have to think with a a peice of paper
 				// Because I can't just add it if it already exists
 
-				delete(n.blocks, record.user)
+				delete(n.blocks, record.User)
 				//sure
 			}
 		}

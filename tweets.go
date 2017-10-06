@@ -18,22 +18,31 @@ const ( //iota is reset to 0
 	DELETE = iota // DELETE=1
 )
 
+type cheat struct {
+	Message string
+	//user     int
+	//follower int
+	//clock    time.Time
+	//counter int
+	//event   int
+}
+
 type tweet struct {
-	message  string
-	user     int
-	follower int
-	clock    time.Time
-	counter  int
-	event    int
+	Message  string
+	User     int
+	Follower int
+	Clock    time.Time
+	Counter  int
+	Event    int
 	//event is the type (tweet,insert,delete)
 }
 
 func (n tweet) getTimestamp() time.Time {
-	return n.clock
+	return n.Clock
 }
 
 func (n tweet) getUser() int {
-	return n.user
+	return n.User
 }
 
 func (n tweet) getJSON() []byte {

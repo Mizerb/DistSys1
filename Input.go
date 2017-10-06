@@ -32,13 +32,14 @@ func (localN *Node) TweetEvent(message string) *Node {
 
 	fmt.Println("Current messages in log:")
 	for i := 0; i < len(localN.log[localN.id]); i++ {
-		fmt.Println(" - ", localN.log[localN.id][i].message)
+		fmt.Println(" - ", localN.log[localN.id][i].Message)
 	}
 	fmt.Println("")
 
 	//update the tweet in memory
 	localN.log[localN.id] = append(localN.log[localN.id], twt)
 
+	localN.writeLog()
 	//update the tweet in the physical log
 	//THIS IS A TEST
 
