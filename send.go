@@ -14,6 +14,15 @@ import (
 // I'll talk it over with Ian...
 func (n *Node) BroadCast() {
 	// locks should be applied here
+	n.BlockMutex.Lock()
+	defer n.BlockMutex.Unlock()
+
+	n.LogMutex.Lock()
+	defer n.LogMutex.Unlock()
+
+	n.TimeMutex.Lock()
+	defer n.TimeMutex.Unlock()
+
 	for i, ip := range n.IPtargets {
 		conn, err := net.Dial("tcp", ip)
 		if err != nil {
@@ -31,6 +40,7 @@ func (n *Node) Send(conn net.Conn, k int) {
 	//n.LogMutex.Lock()
 	msg.Events = make([][]tweet, len(n.Log))
 	msg.Ti = n.TimeArray
+	msg.SendID = n.Id
 
 	for i := range n.Log {
 		for j := range n.Log[i] {
