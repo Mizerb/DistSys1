@@ -8,12 +8,12 @@ import (
 
 /*
 Next To Do:
-   	- Figure out how to log the information. Issue related to format and how it's going to get passed between locations
-	- Might be a good idea to store in different file format, rather than golang's log functionality
-	- Distribute the log passing between different locations (after tweet is called)
 	- Implement wuu-berstien for log consolidation
-	- Set up dictionary for storing of block and unblock commands
 	- Many other things...
+	- Test sending & recieving
+	- Truncate as required for added and deleted dict entries
+	- Ensure logic with muteses is correct (things aren't overwritten at bad times)
+	- find other things to do....
 */
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	local := makeNode(starting)
-	//go listen(local)
+	go listen(local)
 	InputHandler(local)
 	return
 }
