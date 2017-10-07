@@ -8,7 +8,7 @@ import (
 )
 
 func listen(serv *Node) {
-	ln, err := net.Listen("tcp", strconv.Itoa(serv.ListenPort))
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(serv.ListenPort))
 	if err != nil {
 		//crappp
 		log.Fatalln("Failed to connect on port, shutting down ", err)
