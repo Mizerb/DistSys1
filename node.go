@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"net"
 )
 
 const staticLog = "./localLog.json"
@@ -23,7 +24,7 @@ type Node struct {
 	TimeArray [][]int
 	TimeMutex *sync.Mutex
 
-	Blocks map[int]int //I guess I'm going to have to do an array of this, but I  don't want to
+	Blocks map[int]map[int]bool //I guess I'm going to have to do an array of this, but I  don't want to
 	// Let It Be Known To All Who Read the Comments, I Didn't Want This
 	BlockMutex *sync.Mutex
 
@@ -86,8 +87,11 @@ func makeNode(inputfile string) *Node {
 	}*/
 	ret.TimeMutex = &sync.Mutex{}
 
-	ret.Blocks = make(map[int]int)
+	ret.Blocks = make(map[int]map[int]bool)
 	ret.BlockMutex = &sync.Mutex{}
+	for i := 0; i < info.TotalNodes; i++ {
+		ret.Blocks[i] = make(map[int]bool)
+	}
 
 	check, err := ret.LoadDict()
 	if err != nil || check == false {
@@ -189,6 +193,43 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 // essentailly, you only can send out messages when
 //  there's a new tweet, so this requires that tweet.
 // I'll talk it over with Ian...
-func (n *Node) BroadCast(msg tweet) {
+func (n *Node) BroadCast() {
+	for i, ip := range n.IPtargets{
+		conn, err := net.Dial("tcp", ip)
+		if err != nil{
+			log.Println("Failed to connect to ", ip, "  ", err)
+			continue
+		}
+		n.Send( conn, i)
+	}
 	return
+}
+
+func (n *Node) Send( conn net.conn, k int ){
+	defer conn.Close()
+	var msg message
+	//n.LogMutex.Lock()
+	msg.Events = make([][]tweet, len(n.Log))
+	msg.Ti = n.TimeArray
+
+	for i := range n.Log{
+		for j := range n.Log[i]{
+			if  !n.hasRec(n.Log[i][j], k){
+				msg.Events[i] = append( msg.Events[i], n.Log[i][j])
+			}
+		}
+	}
+
+	bytes, err := json.Marshal(msg)
+	if err != nil{
+		log.Println("failed to build message for ",k, "   ", err)
+		return
+	}
+
+	check, err := conn.Write(bytes)
+	if err != nil || check != len(bytes){
+		log.Println("Failed to send message to ", k,"  ", err)
+		return
+	}
+	log.Println("Successfully sent message to ", k)
 }

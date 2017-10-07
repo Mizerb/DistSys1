@@ -18,14 +18,7 @@ const ( //iota is reset to 0
 	DELETE = iota // DELETE=1
 )
 
-type cheat struct {
-	Message string
-	//user     int
-	//follower int
-	//clock    time.Time
-	//counter int
-	//event   int
-}
+
 
 type tweet struct {
 	Message  string

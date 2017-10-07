@@ -24,13 +24,13 @@ func (n *Node) UpdateDict(events [][]tweet) {
 				// for which I am sorry, but I have no choose
 				// I wonder if someone's implemented that yet
 				// would check but I don't have internet
-				n.Blocks[record.User] = record.Follower
+				n.Blocks[record.User][record.Follower] = true
 			} else if record.Event == DELETE {
 				//handle VERY differently.
 				// like I have to think with a a peice of paper
 				// Because I can't just add it if it already exists
 
-				delete(n.Blocks, record.User)
+				delete(n.Blocks[record.User], record.Follower)
 				//sure
 			}
 		}

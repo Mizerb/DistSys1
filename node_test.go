@@ -8,6 +8,16 @@ import (
 	"testing"
 )
 
+type cheat struct {
+	Message string
+	//user     int
+	//follower int
+	//clock    time.Time
+	//counter int
+	//event   int
+}
+
+
 func TestWriteLog(t *testing.T) {
 	os.Remove(staticDict)
 	os.Remove(staticLog)

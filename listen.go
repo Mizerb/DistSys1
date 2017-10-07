@@ -18,6 +18,7 @@ func listen(serv *Node) {
 		conn, err := ln.Accept()
 		if err != nil {
 			//crappppp
+			log.Fatalln(err)
 		}
 		go handleConn(conn, serv)
 	}
