@@ -8,25 +8,40 @@ import (
 	"time"
 )
 
-func (localN *Node) TweetEvent(message string) *Node {
-	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 2}
+//check to see if tweet, block or unblock event
+
+func reverse(logArray []tweet) []tweet {
+	for i, j := 0, len(logArray)-1; i < j; i, j = i+1, j-1 {
+		logArray[i], logArray[j] = logArray[j], logArray[i]
+	}
+	return logArray
+}
+
+func (localN *Node) ViewTweets() {
+	fmt.Println("Current messages in log:")
+	logReverse := reverse(localN.Log[localN.Id])
+	for i := 0; i < len(logReverse); i++ {
+		if logReverse[i].Event == 0 {
+			//TO DO: Check the dictionary to see if the user is currently blocked
+			fmt.Println(" - ", logReverse[i].Message)
+		}
+	}
+}
+
+func (localN *Node) TweetEvent(message string) {
+	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
 
 	//update the tweet in memory
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
 
-	fmt.Println("Current messages in log:")
-	for i := 0; i < len(localN.Log[localN.Id]); i++ {
-		fmt.Println(" - ", localN.Log[localN.Id][i].Message)
-	}
-	fmt.Println("")
-
 	//update the tweet in the physical log
 	localN.writeLog()
 
-	//Next TO DO:
-	//send the log to the other ips
+	//Update the counter
+	localN.Ci++
 
-	return localN
+	//send the log to the other ips
+	localN.BroadCast()
 }
 
 func InputHandler(local *Node) {
@@ -42,6 +57,7 @@ func InputHandler(local *Node) {
 			local.TweetEvent(message)
 		} else if i := strings.Index(input, "view"); i == 0 {
 			fmt.Printf("View called\n")
+			local.ViewTweets()
 		} else if i := strings.Index(input, "block"); i == 0 {
 			username := input[6 : len(input)-1]
 			fmt.Printf("Block called on %s\n", username)
