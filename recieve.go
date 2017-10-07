@@ -1,5 +1,7 @@
 package main
 
+import "log"
+
 /*
 The logic behind this functiion starts with inserting and deleting things from
 the blocks dict, but where does it go from there
@@ -66,6 +68,9 @@ func (n *Node) receive(msg *message) {
 
 	n.TimeMutex.Lock()
 	defer n.TimeMutex.Unlock()
+
+	log.Println("Recieved message from ", msg.SendID)
+
 	//Figure which events are actually new
 	newEvent := make([][]tweet, len(n.Log))
 	for i := range n.Log {
