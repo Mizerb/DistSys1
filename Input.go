@@ -93,7 +93,8 @@ func InputHandler(local *Node) {
 	for true {
 		//done := make(chan bool)
 		fmt.Printf("Please enter a Command: ")
-		input, _ := reader.ReadString('\n')
+		inputTmp, _ := reader.ReadString('\n')
+		input := strings.Replace(inputTmp, "\r", "", -1)
 
 		if i := strings.Index(input, "tweet"); i == 0 {
 			message := input[6 : len(input)-1]
