@@ -12,17 +12,16 @@ import (
 func listen(serv *Node) {
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(serv.ListenPort))
 	if err != nil {
-		//crappp
 		log.Fatalln("Failed to connect on port, shutting down ", err)
 	}
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			//crappppp
 			log.Fatalln(err)
 		}
 		go handleConn(conn, serv)
+		fmt.Printf("Please enter a Command: ")
 	}
 }
 
@@ -40,7 +39,7 @@ func handleConn(conn net.Conn, serv *Node) {
 		log.Println(err)
 		return
 	}
-	var msg *message
+	var msg message
 	err = json.Unmarshal(recvBuf, &msg)
 	if err != nil {
 		log.Println(err)
