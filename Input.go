@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,30 +20,72 @@ func reverse(logArray []tweet) []tweet {
 }
 
 func (localN *Node) ViewTweets() {
-	fmt.Println("Current messages in log:")
+	fmt.Println("Current events in log:")
 	logReverse := reverse(localN.Log[localN.Id])
 	for i := 0; i < len(logReverse); i++ {
+		//TO DO: Check the dictionary to see if the user is currently blocked
+		fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
+		fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at counter " + strconv.Itoa(logReverse[i].Counter) + ", ")
 		if logReverse[i].Event == 0 {
-			//TO DO: Check the dictionary to see if the user is currently blocked
-			fmt.Println(" - ", logReverse[i].Message)
+			fmt.Printf("TWEET: " + logReverse[i].Message)
+		} else if logReverse[i].Event == 1 {
+			fmt.Printf("BLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
+		} else if logReverse[i].Event == 2 {
+			fmt.Printf("UNBLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
 		}
+		//fmt.Println(" - ", logReverse[i].Message)
+		fmt.Println("")
 	}
 }
 
 func (localN *Node) TweetEvent(message string) {
 	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
-
 	//update the tweet in memory
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
-
 	//update the tweet in the physical log
 	localN.writeLog()
-
-	//Update the counter
-	localN.Ci++
-
 	//send the log to the other ips
 	localN.BroadCast()
+	//Update the counter
+	localN.Ci++
+}
+
+func (localN *Node) InvalidBlock(username string, blockType int) bool {
+	//SAFTEY CHECKS TO IMPLEMENT:
+	// - User calls block on another user that exists
+	// - User calls block on a user that is already blocked
+	// - User doesn't call block on themself
+	// - User calls unblock on another user that exists
+	// - User calls unblock on a user that is not in the dictionary
+	return false
+}
+
+func (localN *Node) BlockUser(username string) {
+	if localN.InvalidBlock(username, 1) == true {
+		log.Println("Invalid Block Call")
+		return
+	}
+	userID, _ := strconv.Atoi(username)
+	twtBlock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 1}
+	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtBlock)
+	localN.Blocks[localN.Id][userID] = true
+	localN.writeLog()
+	localN.writeDict()
+	localN.Ci++
+}
+
+func (localN *Node) UnblockUser(username string) {
+	if localN.InvalidBlock(username, 2) == true {
+		log.Println("Invalid Block Call")
+		return
+	}
+	userID, _ := strconv.Atoi(username)
+	twtUnblock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 2}
+	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtUnblock)
+	delete(localN.Blocks[localN.Id], userID)
+	localN.writeLog()
+	localN.writeDict()
+	localN.Ci++
 }
 
 func InputHandler(local *Node) {
@@ -59,12 +103,15 @@ func InputHandler(local *Node) {
 			fmt.Printf("View called\n")
 			local.ViewTweets()
 		} else if i := strings.Index(input, "block"); i == 0 {
-			username := input[6 : len(input)-1]
+			//username := input[6 : len(input)-1]
+			username := input[6:7]
 			fmt.Printf("Block called on %s\n", username)
-			//create new tweet with type set to block, add to local dictonary
+			local.BlockUser(username)
 		} else if i := strings.Index(input, "unblock"); i == 0 {
-			username := input[8 : len(input)-1]
+			//username := input[8 : len(input)-1]
+			username := input[8:9]
 			fmt.Printf("Unblock called on %s\n", username)
+			local.UnblockUser(username)
 		} else if i := strings.Index(input, "exit"); i == 0 {
 			fmt.Printf("Exit called, exiting...")
 			break
