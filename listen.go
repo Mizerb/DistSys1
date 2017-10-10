@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -25,20 +27,26 @@ func listen(serv *Node) {
 }
 
 func handleConn(conn net.Conn, serv *Node) {
+	fmt.Println("Handling connection request...")
 	defer conn.Close()
-	var data []byte
-	_, err := conn.Read(data)
+
+	//NOTE: The buffer is currently statically allocated
+	// If the message becomes too large, it will cause errors
+	//Future To Do: send byte size before sending the log
+	recvBuf := make([]byte, 4096)
+	_, err := conn.Read(recvBuf)
+	recvBuf = bytes.Trim(recvBuf, "\x00")
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	var msg *message
-	err = json.Unmarshal(data, msg)
+	err = json.Unmarshal(recvBuf, &msg)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	//serv.receive(msg)
+	serv.receive(msg)
 	return
 }
