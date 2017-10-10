@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -103,6 +104,13 @@ func makeNode(inputfile string) *Node {
 	}
 
 	ret.IPtargets = make(map[int]string)
+	//Populate the IPtargets
+	for keyValue, mapValue := range info.IPs {
+		idInt, _ := strconv.Atoi(keyValue)
+		if idInt != ret.Id {
+			ret.IPtargets[idInt] = mapValue
+		}
+	}
 
 	ret.Ci = 0
 
