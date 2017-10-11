@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 /*
 The logic behind this functiion starts with inserting and deleting things from
@@ -55,7 +58,7 @@ func (n *Node) UpdateLog(events [][]tweet) {
 	n.writeLog()
 }
 
-func (n *Node) receive(msg *message) {
+func (n *Node) receive(msg message) {
 	// Locks occur at this level
 	// because if they occur any lower
 	// one thread might change the clocks before another adds to the logs.
@@ -70,6 +73,7 @@ func (n *Node) receive(msg *message) {
 	defer n.TimeMutex.Unlock()
 
 	log.Println("Recieved message from ", msg.SendID)
+	//log.Println(msg)
 
 	//Figure which events are actually new
 	newEvent := make([][]tweet, len(n.Log))
@@ -103,5 +107,5 @@ func (n *Node) receive(msg *message) {
 	// I should have verification at this point that they are infact, not currently in
 	// the log
 	n.UpdateLog(newEvent)
-
+	fmt.Printf("Please enter a Command: ")
 }

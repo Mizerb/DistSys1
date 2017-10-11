@@ -64,6 +64,7 @@ func makeNode(inputfile string) *Node {
 
 	ret.ListenPort = info.Localport
 	ret.Id = info.Id
+	ret.Ci = 0
 
 	ret.Log = make([][]tweet, info.TotalNodes)
 	for i := 0; i < info.TotalNodes; i++ {
@@ -82,9 +83,9 @@ func makeNode(inputfile string) *Node {
 	}
 
 	ret.TimeArray = make([][]int, info.TotalNodes)
-	/*for i := range ret.TimeArray {
-		ret.TimeArray[i] = make([]int, info.totalNodes)
-	}*/
+	for i := range ret.TimeArray {
+		ret.TimeArray[i] = make([]int, info.TotalNodes)
+	}
 	ret.TimeMutex = &sync.Mutex{}
 
 	ret.Blocks = make(map[int]map[int]bool)
@@ -112,8 +113,6 @@ func makeNode(inputfile string) *Node {
 		}
 	}
 
-	ret.Ci = 0
-
 	return ret
 }
 
@@ -134,6 +133,7 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 	if err := json.Unmarshal(file, &n.Log); err != nil {
 		return false, err
 	}
+	n.Ci = len(n.Log[n.Id])
 
 	return true, nil
 }
@@ -160,7 +160,7 @@ func (n *Node) LoadDict() (bool, error) {
 
 func (n *Node) writeLog() {
 	//n.logMutex.Lock()
-	logBytes, err := json.Marshal(n.Log)
+	logBytes, err := json.MarshalIndent(n.Log, "", "  ")
 	//defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
@@ -175,7 +175,7 @@ func (n *Node) writeLog() {
 func (n *Node) writeDict() {
 	//n.blockMutex.Lock()
 	//defer n.blockMutex.Unlock()
-	writeBytes, err := json.Marshal(n.Blocks)
+	writeBytes, err := json.MarshalIndent(n.Blocks, "", "  ")
 	if err != nil {
 		log.Fatalf("failed to Marshel to static Dict\n")
 	}
@@ -188,8 +188,8 @@ func (n *Node) writeDict() {
 }
 
 func (n *Node) hasRec(msg tweet, k int) bool {
-	n.TimeMutex.Lock()
+	//n.TimeMutex.Lock()
 	ret := n.TimeArray[k][msg.User] >= msg.Counter
-	n.TimeMutex.Unlock()
+	//n.TimeMutex.Unlock()
 	return ret
 }

@@ -21,7 +21,6 @@ func listen(serv *Node) {
 			log.Fatalln(err)
 		}
 		go handleConn(conn, serv)
-		fmt.Printf("Please enter a Command: ")
 	}
 }
 

@@ -19,9 +19,38 @@ func reverse(logArray []tweet) []tweet {
 	return logArray
 }
 
+func OrganizeTweets(logContent [][]tweet) []tweet {
+	var combineList []tweet
+	for i := 0; i < len(logContent); i++ {
+		for j := 0; j < len(logContent[i]); j++ {
+			if len(combineList) == 0 {
+				combineList = append(combineList, logContent[i][j])
+				continue
+			} else {
+				for k := 0; k < len(combineList); k++ {
+					if combineList[k].Clock.After(logContent[i][j].Clock) {
+						combineListBefore := combineList[0:k]
+						combineListAfter := combineList[k : len(combineList)-1]
+						combineList = append(combineListBefore, logContent[i][j])
+						for l := 1; l < len(combineListAfter); l++ {
+							combineList = append(combineList, combineListAfter[l])
+						}
+						break
+					} else if k+1 == len(combineList) {
+						combineList = append(combineList, logContent[i][j])
+						break
+					}
+				}
+			}
+		}
+	}
+	return combineList
+}
+
 func (localN *Node) ViewTweets() {
 	fmt.Println("Current events in log:")
-	logReverse := reverse(localN.Log[localN.Id])
+	organizedLog := OrganizeTweets(localN.Log)
+	logReverse := reverse(organizedLog)
 	for i := 0; i < len(logReverse); i++ {
 		//TO DO: Check the dictionary to see if the user is currently blocked
 		fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
@@ -39,6 +68,8 @@ func (localN *Node) ViewTweets() {
 }
 
 func (localN *Node) TweetEvent(message string) {
+	//Update the counter
+	localN.Ci++
 	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
 	//update the tweet in memory
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
@@ -46,8 +77,6 @@ func (localN *Node) TweetEvent(message string) {
 	localN.writeLog()
 	//send the log to the other ips
 	localN.BroadCast()
-	//Update the counter
-	localN.Ci++
 }
 
 func (localN *Node) InvalidBlock(username string, blockType int) bool {
@@ -65,13 +94,13 @@ func (localN *Node) BlockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
+	localN.Ci++
 	userID, _ := strconv.Atoi(username)
 	twtBlock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 1}
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtBlock)
 	localN.Blocks[localN.Id][userID] = true
 	localN.writeLog()
 	localN.writeDict()
-	localN.Ci++
 }
 
 func (localN *Node) UnblockUser(username string) {
