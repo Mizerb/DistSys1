@@ -23,18 +23,18 @@ func OrganizeTweets(logContent [][]tweet) []tweet {
 	var combineList []tweet
 	for i := 0; i < len(logContent); i++ {
 		for j := 0; j < len(logContent[i]); j++ {
+			if logContent[i][j].Event != 0 {
+				continue
+			}
 			if len(combineList) == 0 {
 				combineList = append(combineList, logContent[i][j])
-				continue
 			} else {
 				for k := 0; k < len(combineList); k++ {
-					if combineList[k].Clock.After(logContent[i][j].Clock) {
-						combineListBefore := combineList[0:k]
-						combineListAfter := combineList[k : len(combineList)-1]
-						combineList = append(combineListBefore, logContent[i][j])
-						for l := 1; l < len(combineListAfter); l++ {
-							combineList = append(combineList, combineListAfter[l])
-						}
+					if logContent[i][j].Clock.Before(combineList[k].Clock) {
+						var combineListBefore []tweet
+						combineListCopy := append([]tweet(nil), combineList...)
+						combineListBefore = append(combineList[:k], logContent[i][j])
+						combineList = append(combineListBefore, combineListCopy[k:]...)
 						break
 					} else if k+1 == len(combineList) {
 						combineList = append(combineList, logContent[i][j])
@@ -52,16 +52,21 @@ func (localN *Node) ViewTweets() {
 	organizedLog := OrganizeTweets(localN.Log)
 	logReverse := reverse(organizedLog)
 	for i := 0; i < len(logReverse); i++ {
-		//TO DO: Check the dictionary to see if the user is currently blocked
-		fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
-		fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at counter " + strconv.Itoa(logReverse[i].Counter) + ", ")
-		if logReverse[i].Event == 0 {
+		if logReverse[i].Event == 0 && localN.Blocks[localN.Id][logReverse[i].User] == false {
+			fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
+			fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at site counter " + strconv.Itoa(logReverse[i].Counter) + ": ")
+			fmt.Printf(logReverse[i].Message)
+		}
+		//Code for printing all tweets, block and unblock events
+		//fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
+		//fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at counter " + strconv.Itoa(logReverse[i].Counter) + ", ")
+		/*if logReverse[i].Event == 0 && localN.Blocks[localN.Id][logReverse[i].User] == false {
 			fmt.Printf("TWEET: " + logReverse[i].Message)
 		} else if logReverse[i].Event == 1 {
 			fmt.Printf("BLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
 		} else if logReverse[i].Event == 2 {
 			fmt.Printf("UNBLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
-		}
+		}*/
 		//fmt.Println(" - ", logReverse[i].Message)
 		fmt.Println("")
 	}
@@ -80,12 +85,31 @@ func (localN *Node) TweetEvent(message string) {
 }
 
 func (localN *Node) InvalidBlock(username string, blockType int) bool {
-	//SAFTEY CHECKS TO IMPLEMENT:
-	// - User calls block on another user that exists
+	//userID, _ := strconv.Atoi(username)
+	userID, err := strconv.Atoi(username)
+	if err != nil {
+		return true
+	}
+	//SAFTEY CHECKS:
+	// - User calls block/unblock on another user that exists (and string is a number)
+	//		- Assume that the id is always from 0 to len-1
+	if userID < 0 || userID > len(localN.IPtargets) {
+		return true
+	}
+	// - User calls block on themself
+	if localN.Id == userID {
+		return true
+	}
 	// - User calls block on a user that is already blocked
-	// - User doesn't call block on themself
-	// - User calls unblock on another user that exists
 	// - User calls unblock on a user that is not in the dictionary
+	if ok := localN.Blocks[localN.Id][userID]; ok {
+		if blockType == 1 {
+			return true
+		}
+	} else if blockType == 2 {
+		return true
+	}
+
 	return false
 }
 
@@ -108,13 +132,13 @@ func (localN *Node) UnblockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
+	localN.Ci++
 	userID, _ := strconv.Atoi(username)
 	twtUnblock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 2}
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtUnblock)
 	delete(localN.Blocks[localN.Id], userID)
 	localN.writeLog()
 	localN.writeDict()
-	localN.Ci++
 }
 
 func InputHandler(local *Node) {
