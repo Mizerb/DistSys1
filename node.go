@@ -134,6 +134,7 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 		return false, err
 	}
 	n.Ci = len(n.Log[n.Id])
+	//n.updateLocalTimeArray()
 
 	return true, nil
 }
@@ -192,4 +193,13 @@ func (n *Node) hasRec(msg tweet, k int) bool {
 	ret := n.TimeArray[k][msg.User] >= msg.Counter
 	//n.TimeMutex.Unlock()
 	return ret
+}
+
+func (n *Node) updateLocalTimeArray() {
+	var tArr []int
+	for i := 0; i < len(n.Log); i++ {
+		tArr = append(tArr, len(n.Log[i]))
+		//TO DO: update the other sites (maybe, idk yet)
+	}
+	n.TimeArray[n.Id] = tArr
 }

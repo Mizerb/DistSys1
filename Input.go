@@ -48,6 +48,8 @@ func OrganizeTweets(logContent [][]tweet) []tweet {
 }
 
 func (localN *Node) ViewTweets() {
+	//localN.updateLocalTimeArray()
+	//fmt.Println(localN.TimeArray)
 	fmt.Println("Current events in log:")
 	organizedLog := OrganizeTweets(localN.Log)
 	logReverse := reverse(organizedLog)
@@ -82,6 +84,7 @@ func (localN *Node) TweetEvent(message string) {
 	localN.writeLog()
 	//send the log to the other ips
 	localN.BroadCast()
+	localN.updateLocalTimeArray()
 }
 
 func (localN *Node) InvalidBlock(username string, blockType int) bool {
