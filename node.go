@@ -35,7 +35,7 @@ type Node struct {
 	Names      map[int]string
 }
 
-func makeNode(inputfile string) *Node {
+func makeNode(inputfile string, inputID int) *Node {
 	ret := new(Node)
 
 	file, err := ioutil.ReadFile(inputfile)
@@ -44,7 +44,6 @@ func makeNode(inputfile string) *Node {
 	}
 
 	type startinfo struct {
-		Id         int
 		Names      map[string]string
 		TotalNodes int
 		IPs        map[string]string
@@ -67,11 +66,12 @@ func makeNode(inputfile string) *Node {
 	//fmt.Println(info.Id)
 	//fmt.Println(info.TotalNodes)
 
-	ret.Id = info.Id
+	//ret.Id = info.Id
+	ret.Id = inputID
 	ret.Ci = 0
 	ret.UserName = info.Names[strconv.Itoa(ret.Id)]
 
-	parts := strings.Split(info.IPs[strconv.Itoa(info.Id)], ":")
+	parts := strings.Split(info.IPs[strconv.Itoa(ret.Id)], ":")
 	ret.ListenPort, err = strconv.Atoi(parts[1])
 	if err != nil {
 		log.Panicln("Failed to get IP address for local node")
@@ -159,7 +159,6 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 		return false, err
 	}
 	n.Ci = len(n.Log[n.Id])
-	//n.updateLocalTimeArray()
 
 	return true, nil
 }
@@ -167,7 +166,6 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 func (n *Node) LoadDict() (bool, error) {
 	_, err := os.Stat(staticDict)
 	if os.IsNotExist(err) {
-		//log.Panicln("DICT FILE NOT YET CREATED")
 		log.Println("DICT FILE NOT YET CREATED")
 		return false, nil
 	}
@@ -207,9 +205,7 @@ func (n *Node) writeDict() {
 	}
 	err = ioutil.WriteFile(staticDict, writeBytes, 0644)
 	if err != nil {
-		//well shit,
 		log.Fatalln("Failed to write to static dict")
-		//
 	}
 }
 
@@ -222,9 +218,7 @@ func (n *Node) writeTArray() {
 	}
 	err = ioutil.WriteFile(staticTArray, writeBytes, 0644)
 	if err != nil {
-		//well shit,
 		log.Fatalln("Failed to write to static dict")
-		//
 	}
 }
 
@@ -249,9 +243,7 @@ func (n *Node) LoadTArray() (bool, error) {
 }
 
 func (n *Node) hasRec(msg tweet, k int) bool {
-	//n.TimeMutex.Lock()
 	ret := n.TimeArray[k][msg.User] >= msg.Counter
-	//n.TimeMutex.Unlock()
 	return ret
 }
 
@@ -259,7 +251,6 @@ func (n *Node) updateLocalTimeArray() {
 	var tArr []int
 	for i := 0; i < len(n.Log); i++ {
 		tArr = append(tArr, len(n.Log[i]))
-		//TO DO: update the other sites (maybe, idk yet)
 	}
 	n.TimeArray[n.Id] = tArr
 }
