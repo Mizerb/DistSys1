@@ -85,6 +85,9 @@ func makeNode(inputfile string) *Node {
 	ret.TimeArray = make([][]int, info.TotalNodes)
 	for i := range ret.TimeArray {
 		ret.TimeArray[i] = make([]int, info.TotalNodes)
+		for z := range ret.TimeArray {
+			ret.TimeArray[i][z] = 0
+		}
 	}
 	ret.TimeMutex = &sync.Mutex{}
 
