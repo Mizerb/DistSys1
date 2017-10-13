@@ -11,6 +11,7 @@ import (
 
 const staticLog = "./localLog.json"
 const staticDict = "./localDict.json"
+const staticTArray = "./localTArray.json"
 
 type Node struct {
 	Id int
@@ -89,6 +90,7 @@ func makeNode(inputfile string) *Node {
 			ret.TimeArray[i][z] = 0
 		}
 	}
+
 	ret.TimeMutex = &sync.Mutex{}
 
 	ret.Blocks = make(map[int]map[int]bool)
@@ -191,6 +193,41 @@ func (n *Node) writeDict() {
 	}
 }
 
+func (n *Node) writeTArray() {
+	//n.blockMutex.Lock()
+	//defer n.blockMutex.Unlock()
+	writeBytes, err := json.MarshalIndent(n.TimeArray, "", "  ")
+	if err != nil {
+		log.Fatalf("failed to Marshel to static Dict\n")
+	}
+	err = ioutil.WriteFile(staticTArray, writeBytes, 0644)
+	if err != nil {
+		//well shit,
+		log.Fatalln("Failed to write to static dict")
+		//
+	}
+}
+
+func (n *Node) LoadTArray() (bool, error) {
+	_, err := os.Stat(staticTArray)
+	if os.IsNotExist(err) {
+		//log.Panicln("DICT FILE NOT YET CREATED")
+		log.Println("TARRAY FILE NOT YET CREATED")
+		return false, nil
+	}
+
+	file, err := ioutil.ReadFile(staticDict)
+	if err != nil {
+		return false, err
+	}
+	n.TimeMutex.Lock()
+	defer n.TimeMutex.Unlock()
+	if err := json.Unmarshal(file, &n.TimeArray); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (n *Node) hasRec(msg tweet, k int) bool {
 	//n.TimeMutex.Lock()
 	ret := n.TimeArray[k][msg.User] >= msg.Counter
@@ -205,4 +242,9 @@ func (n *Node) updateLocalTimeArray() {
 		//TO DO: update the other sites (maybe, idk yet)
 	}
 	n.TimeArray[n.Id] = tArr
+}
+
+func (n *Node) incrementClock() {
+	n.Ci = n.Ci + 1
+	n.TimeArray[n.Id][n.Id] = n.Ci
 }
