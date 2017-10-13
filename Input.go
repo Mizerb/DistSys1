@@ -58,6 +58,7 @@ func (localN *Node) ViewTweets() {
 			fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
 			fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at site counter " + strconv.Itoa(logReverse[i].Counter) + ": ")
 			fmt.Printf(logReverse[i].Message)
+			fmt.Println("")
 		}
 		//Code for printing all tweets, block and unblock events
 		//fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
@@ -70,13 +71,14 @@ func (localN *Node) ViewTweets() {
 			fmt.Printf("UNBLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
 		}*/
 		//fmt.Println(" - ", logReverse[i].Message)
-		fmt.Println("")
+		//fmt.Println("")
 	}
 }
 
 func (localN *Node) TweetEvent(message string) {
 	//Update the counter
-	localN.Ci++
+	localN.incrementClock()
+	//localN.Ci++
 	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
 	//update the tweet in memory
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
@@ -84,7 +86,6 @@ func (localN *Node) TweetEvent(message string) {
 	localN.writeLog()
 	//send the log to the other ips
 	localN.BroadCast()
-	localN.updateLocalTimeArray()
 }
 
 func (localN *Node) InvalidBlock(username string, blockType int) bool {
@@ -121,7 +122,8 @@ func (localN *Node) BlockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
-	localN.Ci++
+	//localN.Ci++
+	localN.incrementClock()
 	userID, _ := strconv.Atoi(username)
 	twtBlock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 1}
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtBlock)
@@ -135,7 +137,8 @@ func (localN *Node) UnblockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
-	localN.Ci++
+	//localN.Ci++
+	localN.incrementClock()
 	userID, _ := strconv.Atoi(username)
 	twtUnblock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 2}
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtUnblock)
