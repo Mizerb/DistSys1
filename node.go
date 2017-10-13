@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -43,7 +44,7 @@ func makeNode(inputfile string) *Node {
 
 	type startinfo struct {
 		Id         int
-		Localport  int
+		Names      map[string]string
 		TotalNodes int
 		IPs        map[string]string
 	}
@@ -60,12 +61,17 @@ func makeNode(inputfile string) *Node {
 	}
 
 	info.Id = int(dat["Id"].(float64))
-	info.Localport = int(dat["Localport"].(float64))
 	info.TotalNodes = int(dat["TotalNodes"].(float64))
 
-	ret.ListenPort = info.Localport
 	ret.Id = info.Id
 	ret.Ci = 0
+
+	parts := strings.Split(info.IPs[strconv.Itoa(info.Id)], ":")
+	ret.ListenPort, err = strconv.Atoi(parts[1])
+	if err != nil {
+		log.Panicln("Failed to get IP address for local node")
+		log.Fatalln(err)
+	}
 
 	ret.Log = make([][]tweet, info.TotalNodes)
 	for i := 0; i < info.TotalNodes; i++ {

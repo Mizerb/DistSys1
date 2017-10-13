@@ -1,6 +1,11 @@
 {
     "Id":0,
-    "Localport":8000,
+    "Names":{
+        "0":"BoB",
+        "1":"Dylan",
+        "2":"Katey",
+        "3":"Jessica",
+        "4":"Ulysses"},
     "TotalNodes":5,
     "IPs":{
         "0":"127.0.0.1:8001",
