@@ -17,11 +17,12 @@ type cheat struct {
 	//event   int
 }
 
-
 func TestWriteLog(t *testing.T) {
 	os.Remove(staticDict)
 	os.Remove(staticLog)
 	node := makeNode("entryData.json")
+
+	fmt.Println("Listening on ", node.ListenPort)
 
 	msg := tweet{User: 0, Event: 0, Message: "haha"}
 	node.Log[0] = append(node.Log[0], msg)

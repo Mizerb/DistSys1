@@ -32,6 +32,7 @@ type Node struct {
 
 	ListenPort int
 	IPtargets  map[int]string
+	Names      map[int]string
 }
 
 func makeNode(inputfile string) *Node {
@@ -55,16 +56,20 @@ func makeNode(inputfile string) *Node {
 	}
 
 	//To get the id, localport, and totalNodes, this separate object needs to be used
-	var dat map[string]interface{}
-	if err := json.Unmarshal(file, &dat); err != nil {
-		panic(err)
-	}
+	//var dat map[string]interface{}
+	//if err := json.Unmarshal(file, &dat); err != nil {
+	//	panic(err)
+	//}
 
-	info.Id = int(dat["Id"].(float64))
-	info.TotalNodes = int(dat["TotalNodes"].(float64))
+	//info.Id = int(dat["Id"].(float64))
+	//info.TotalNodes = int(dat["TotalNodes"].(float64))
+
+	//fmt.Println(info.Id)
+	//fmt.Println(info.TotalNodes)
 
 	ret.Id = info.Id
 	ret.Ci = 0
+	ret.UserName = info.Names[strconv.Itoa(ret.Id)]
 
 	parts := strings.Split(info.IPs[strconv.Itoa(info.Id)], ":")
 	ret.ListenPort, err = strconv.Atoi(parts[1])
@@ -121,6 +126,15 @@ func makeNode(inputfile string) *Node {
 		idInt, _ := strconv.Atoi(keyValue)
 		if idInt != ret.Id {
 			ret.IPtargets[idInt] = mapValue
+		}
+	}
+
+	ret.Names = make(map[int]string)
+	//Populate the IPtargets
+	for keyValue, mapValue := range info.Names {
+		idInt, _ := strconv.Atoi(keyValue)
+		if idInt != ret.Id {
+			ret.Names[idInt] = mapValue
 		}
 	}
 
