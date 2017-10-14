@@ -24,6 +24,10 @@ func (n *Node) BroadCast() {
 	defer n.TimeMutex.Unlock()
 
 	for i, ip := range n.IPtargets {
+		if ok := n.Blocks[n.Id][i]; ok {
+			log.Println("ID ", i, " is blocked, not sending to location")
+			continue
+		}
 		conn, err := net.Dial("tcp", ip)
 		if err != nil {
 			log.Println("Failed to connect to ", ip, "  ", err)
