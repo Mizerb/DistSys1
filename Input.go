@@ -10,7 +10,40 @@ import (
 	"time"
 )
 
-//check to see if tweet, block or unblock event
+//Prints all events stored in the log
+func (localN *Node) PrintLog() {
+	//fmt.Println(localN.Log)
+	for i := 0; i < len(localN.Log); i++ {
+		fmt.Println("Log Content for User", i, "-", len(localN.Log[i]), "item(s)")
+		if len(localN.Log[i]) == 0 {
+			continue
+		}
+		for j := 0; j < len(localN.Log[i]); j++ {
+			//fmt.Println(" -", localN.Log[i][j])
+			fmt.Printf(time.Time.String(localN.Log[i][j].Clock) + " - ")
+			fmt.Printf("User " + strconv.Itoa(localN.Log[i][j].User) + " at counter " + strconv.Itoa(localN.Log[i][j].Counter) + ", ")
+			if localN.Log[i][j].Event == 0 {
+				fmt.Printf("TWEET: " + localN.Log[i][j].Message)
+			} else if localN.Log[i][j].Event == 1 {
+				fmt.Printf("BLOCK: Follower " + strconv.Itoa(localN.Log[i][j].Follower))
+			} else if localN.Log[i][j].Event == 2 {
+				fmt.Printf("UNBLOCK: Follower " + strconv.Itoa(localN.Log[i][j].Follower))
+			}
+			fmt.Println("")
+		}
+	}
+}
+
+//Prints all events stored in the log (for pu)
+func (localN *Node) PrintDictionary() {
+	//fmt.Println(localN.Blocks)
+	for k, v := range localN.Blocks {
+		fmt.Println("Dictionary at site", k, "-", len(v), "site(s) blocked")
+		for kVal := range localN.Blocks[k] {
+			fmt.Println("- Site", kVal)
+		}
+	}
+}
 
 func reverse(logArray []tweet) []tweet {
 	for i, j := 0, len(logArray)-1; i < j; i, j = i+1, j-1 {
@@ -172,6 +205,12 @@ func InputHandler(local *Node) {
 			username := input[8:9]
 			fmt.Printf("Unblock called on %s\n", username)
 			local.UnblockUser(username)
+		} else if i := strings.Index(input, "print log"); i == 0 {
+			fmt.Printf("Print Log called\n")
+			local.PrintLog()
+		} else if i := strings.Index(input, "print dict"); i == 0 {
+			fmt.Printf("Print Dictionary called\n")
+			local.PrintDictionary()
 		} else if i := strings.Index(input, "exit"); i == 0 {
 			fmt.Printf("Exit called, exiting...")
 			break
