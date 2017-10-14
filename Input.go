@@ -212,7 +212,7 @@ func InputHandler(local *Node) {
 			fmt.Printf("Print Dictionary called\n")
 			local.PrintDictionary()
 		} else if i := strings.Index(input, "exit"); i == 0 {
-			fmt.Printf("Exit called, exiting...")
+			fmt.Printf("Exit called, exiting...\n")
 			break
 		} else {
 			fmt.Printf("Command not recognized\n")
