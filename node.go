@@ -174,11 +174,23 @@ func (n *Node) LoadDict() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	n.BlockMutex.Lock()
-	defer n.BlockMutex.Unlock()
-	if err := json.Unmarshal(file, &n.Blocks); err != nil {
+	cheat := make(map[string]map[string]bool)
+
+	if err := json.Unmarshal(file, &cheat); err != nil {
 		return false, err
 	}
+
+	for i := range cheat {
+		for j := range cheat[i] {
+			key1, erra := strconv.Atoi(i)
+			key2, errb := strconv.Atoi(j)
+			if erra != nil || errb != nil {
+				log.Fatalln("Failed to read staticDict", erra, errb)
+			}
+			n.Blocks[key1][key2] = cheat[i][j]
+		}
+	}
+
 	return true, nil
 }
 
@@ -199,8 +211,18 @@ func (n *Node) writeLog() {
 func (n *Node) writeDict() {
 	//n.blockMutex.Lock()
 	//defer n.blockMutex.Unlock()
-	writeBytes, err := json.MarshalIndent(n.Blocks, "", "  ")
+	cheat := make(map[string]map[string]bool)
+
+	for i := range n.Blocks {
+		cheat[strconv.Itoa(i)] = make(map[string]bool)
+		for j := range n.Blocks[i] {
+			cheat[strconv.Itoa(i)][strconv.Itoa(j)] = n.Blocks[i][j]
+		}
+	}
+
+	writeBytes, err := json.MarshalIndent(cheat, "", "  ")
 	if err != nil {
+		log.Println(err)
 		log.Fatalf("failed to Marshel to static Dict\n")
 	}
 	err = ioutil.WriteFile(staticDict, writeBytes, 0644)
@@ -280,7 +302,7 @@ func (n *Node) truncate(user int, follower int) {
 			break
 		}
 	}
-
+	// if any node hasn't recieved the unblock, don't remove it.
 	for i := range n.TimeArray {
 		if false == n.hasRec(t, i) {
 			return
