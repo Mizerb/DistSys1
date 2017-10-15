@@ -70,6 +70,7 @@ func makeNode(inputfile string, inputID int) *Node {
 
 		//ret.Id = info.Id
 	*/
+	ret.NodeMutex = &sync.Mutex{}
 	ret.Id = inputID
 	ret.Ci = 0
 	ret.UserName = info.Names[strconv.Itoa(ret.Id)]
