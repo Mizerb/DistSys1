@@ -24,8 +24,6 @@ func (n *Node) BroadCast() {
 		n.TimeMutex.Lock()
 		defer n.TimeMutex.Unlock()
 	*/
-	n.NodeMutex.Lock()
-	defer n.NodeMutex.Unlock()
 	for i, ip := range n.IPtargets {
 		if ok := n.Blocks[n.Id][i]; ok {
 			log.Println("ID ", i, " is blocked, not sending to location")

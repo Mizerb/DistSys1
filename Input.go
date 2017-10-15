@@ -110,6 +110,8 @@ func (localN *Node) ViewTweets() {
 
 func (localN *Node) TweetEvent(message string) {
 	//Update the counter
+	localN.NodeMutex.Lock()
+	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
 	//localN.Ci++
 	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
@@ -156,6 +158,8 @@ func (localN *Node) BlockUser(username string) {
 		return
 	}
 	//localN.Ci++
+	localN.NodeMutex.Lock()
+	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
 	userID, _ := strconv.Atoi(username)
 	twtBlock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 1}
@@ -171,6 +175,8 @@ func (localN *Node) UnblockUser(username string) {
 		return
 	}
 	//localN.Ci++
+	localN.NodeMutex.Lock()
+	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
 	userID, _ := strconv.Atoi(username)
 	twtUnblock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 2}
@@ -202,7 +208,7 @@ func InputHandler(local *Node) {
 			fmt.Printf("Block called on %s\n", username)
 			local.BlockUser(username)
 		} else if i := strings.Index(input, "unblock"); i == 0 {
-			//username := input[8 : len(input)-1]
+			//username := input[8 : len(input)-1
 			username := input[8:9]
 			fmt.Printf("Unblock called on %s\n", username)
 			local.UnblockUser(username)
