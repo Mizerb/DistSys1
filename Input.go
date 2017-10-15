@@ -39,8 +39,8 @@ func (localN *Node) PrintDictionary() {
 	//fmt.Println(localN.Blocks)
 	for k, v := range localN.Blocks {
 		fmt.Println("Dictionary at site", k, "-", len(v), "site(s) blocked")
-		for kVal := range localN.Blocks[k] {
-			fmt.Println("- Site", kVal)
+		for kVal, vVal := range localN.Blocks[k] {
+			fmt.Println("- Site", kVal, ", ", vVal)
 		}
 	}
 }
