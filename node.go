@@ -18,17 +18,19 @@ type Node struct {
 	Id int
 	Ci int
 
+	NodeMutex *sync.Mutex
+
 	UserName string
 
-	Log      [][]tweet
-	LogMutex *sync.Mutex
+	Log [][]tweet
+	//LogMutex *sync.Mutex
 
 	TimeArray [][]int
-	TimeMutex *sync.Mutex
+	//TimeMutex *sync.Mutex
 
 	Blocks map[int]map[int]bool //I guess I'm going to have to do an array of this, but I  don't want to
 	// Let It Be Known To All Who Read the Comments, I Didn't Want This
-	BlockMutex *sync.Mutex
+	//BlockMutex *sync.Mutex
 
 	ListenPort int
 	IPtargets  map[int]string
@@ -53,20 +55,21 @@ func makeNode(inputfile string, inputID int) *Node {
 	if err := json.Unmarshal(file, &info); err != nil {
 		log.Fatal(err)
 	}
+	/*
+		//To get the id, localport, and totalNodes, this separate object needs to be used
+		//var dat map[string]interface{}
+		//if err := json.Unmarshal(file, &dat); err != nil {
+		//	panic(err)
+		//}
 
-	//To get the id, localport, and totalNodes, this separate object needs to be used
-	//var dat map[string]interface{}
-	//if err := json.Unmarshal(file, &dat); err != nil {
-	//	panic(err)
-	//}
+		//info.Id = int(dat["Id"].(float64))
+		//info.TotalNodes = int(dat["TotalNodes"].(float64))
 
-	//info.Id = int(dat["Id"].(float64))
-	//info.TotalNodes = int(dat["TotalNodes"].(float64))
+		//fmt.Println(info.Id)
+		//fmt.Println(info.TotalNodes)
 
-	//fmt.Println(info.Id)
-	//fmt.Println(info.TotalNodes)
-
-	//ret.Id = info.Id
+		//ret.Id = info.Id
+	*/
 	ret.Id = inputID
 	ret.Ci = 0
 	ret.UserName = info.Names[strconv.Itoa(ret.Id)]
@@ -82,7 +85,7 @@ func makeNode(inputfile string, inputID int) *Node {
 	for i := 0; i < info.TotalNodes; i++ {
 		ret.Log[i] = make([]tweet, 0, 10)
 	}
-	ret.LogMutex = &sync.Mutex{}
+	//ret.LogMutex = &sync.Mutex{}
 
 	if check, err := ret.LoadTweets(staticLog); err != nil || check == false {
 		//log.Fatal("welp")
@@ -102,10 +105,10 @@ func makeNode(inputfile string, inputID int) *Node {
 		}
 	}
 
-	ret.TimeMutex = &sync.Mutex{}
+	//ret.TimeMutex = &sync.Mutex{}
 
 	ret.Blocks = make(map[int]map[int]bool)
-	ret.BlockMutex = &sync.Mutex{}
+	//ret.BlockMutex = &sync.Mutex{}
 	for i := 0; i < info.TotalNodes; i++ {
 		ret.Blocks[i] = make(map[int]bool)
 	}
@@ -153,8 +156,8 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 		return false, err
 	}
 
-	n.LogMutex.Lock()
-	defer n.LogMutex.Unlock()
+	//n.LogMutex.Lock()
+	//defer n.LogMutex.Unlock()
 	if err := json.Unmarshal(file, &n.Log); err != nil {
 		return false, err
 	}
@@ -256,8 +259,8 @@ func (n *Node) LoadTArray() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	n.TimeMutex.Lock()
-	defer n.TimeMutex.Unlock()
+	//n.TimeMutex.Lock()
+	//defer n.TimeMutex.Unlock()
 	if err := json.Unmarshal(file, &n.TimeArray); err != nil {
 		return false, err
 	}
@@ -308,21 +311,18 @@ func (n *Node) truncate(user int, follower int) {
 			return
 		}
 	}
-	//remove from log
-	for i := range n.Log[n.Id] {
-		// remove from log
-		if n.Log[n.Id][i].Follower == follower && n.Log[n.Id][i].User == user {
-			n.Log[n.Id] = append(n.Log[n.Id][:i], n.Log[n.Id][i+1:]...)
-			break
+	i := 0
+	for _, x := range n.Log[user] {
+		if !rmcheck(&x, user, follower) {
+			n.Log[user][i] = x
+			i++
 		}
 	}
-	for i := range n.Log[n.Id] {
-		// remove from log
-		if n.Log[n.Id][i].Follower == follower && n.Log[n.Id][i].User == user {
-			n.Log[n.Id] = append(n.Log[n.Id][:i], n.Log[n.Id][i+1:]...)
-			break
-		}
-	}
+	n.Log[user] = n.Log[user][:i]
 	//Since the record has been removed, we can delete
 	delete(n.Blocks[user], follower)
+}
+
+func rmcheck(t *tweet, use int, fol int) bool {
+	return (t.Follower == fol && t.User == use && (t.Event == DELETE || t.Event == INSERT))
 }

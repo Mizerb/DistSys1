@@ -98,13 +98,13 @@ func TestTruncate(t *testing.T) {
 	local.Log[local.Id] = append(local.Log[local.Id], twtUnblock)
 	local.Blocks[local.Id][0] = false
 
-	local.incrementClock()
-	taw := tweet{"bob", local.Id, 99, time.Now().UTC(), local.Ci, 0}
-	local.Log[local.Id] = append(local.Log[local.Id], taw)
+	//local.incrementClock()
+	//taw := tweet{"bob", local.Id, 99, time.Now().UTC(), local.Ci, 0}
+	//local.Log[local.Id] = append(local.Log[local.Id], taw)
 	local.writeDict()
 	local.CleanDict()
 	local.writeDict()
-	if len(local.Log[local.Id]) != 1 {
+	if len(local.Log[local.Id]) != 0 {
 		fmt.Println("Log not equal to 0")
 		fmt.Println(local.Log)
 		t.Fail()

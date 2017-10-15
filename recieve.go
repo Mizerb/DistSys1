@@ -64,14 +64,18 @@ func (n *Node) receive(msg message) {
 	// because if they occur any lower
 	// one thread might change the clocks before another adds to the logs.
 	// which would be ... very bad
-	n.BlockMutex.Lock()
+
+	/*n.BlockMutex.Lock()
 	defer n.BlockMutex.Unlock()
 
 	n.LogMutex.Lock()
 	defer n.LogMutex.Unlock()
 
 	n.TimeMutex.Lock()
-	defer n.TimeMutex.Unlock()
+	defer n.TimeMutex.Unlock()*/
+
+	n.NodeMutex.Lock()
+	defer n.NodeMutex.Unlock()
 
 	log.Println("Recieved message from ", msg.SendID)
 	//log.Println(msg)

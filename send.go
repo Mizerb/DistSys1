@@ -14,15 +14,18 @@ import (
 // I'll talk it over with Ian...
 func (n *Node) BroadCast() {
 	// locks should be applied here
-	n.BlockMutex.Lock()
-	defer n.BlockMutex.Unlock()
+	/*
+		n.BlockMutex.Lock()
+		defer n.BlockMutex.Unlock()
 
-	n.LogMutex.Lock()
-	defer n.LogMutex.Unlock()
+		n.LogMutex.Lock()
+		defer n.LogMutex.Unlock()
 
-	n.TimeMutex.Lock()
-	defer n.TimeMutex.Unlock()
-
+		n.TimeMutex.Lock()
+		defer n.TimeMutex.Unlock()
+	*/
+	n.NodeMutex.Lock()
+	defer n.NodeMutex.Unlock()
 	for i, ip := range n.IPtargets {
 		if ok := n.Blocks[n.Id][i]; ok {
 			log.Println("ID ", i, " is blocked, not sending to location")
