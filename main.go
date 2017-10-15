@@ -7,16 +7,6 @@ import (
 	"strconv"
 )
 
-/*
-Next To Do:
-	- Implement wuu-berstien for log consolidation
-	- Many other things...
-	- Test sending & recieving
-	- Truncate as required for added and deleted dict entries
-	- Ensure logic with muteses is correct (things aren't overwritten at bad times)
-	- find other things to do....
-*/
-
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("First argument must be configuration file, Second must be the ID of the location")
@@ -34,6 +24,7 @@ func main() {
 	}
 
 	local := makeNode(starting, idInt)
+	//create thread at separate function to listen for incomming messages
 	go listen(local)
 	InputHandler(local)
 	return
