@@ -291,6 +291,14 @@ func (n *Node) truncate(user int, follower int) {
 		// remove from log
 		if n.Log[n.Id][i].Follower == follower && n.Log[n.Id][i].User == user {
 			n.Log[n.Id] = append(n.Log[n.Id][:i], n.Log[n.Id][i+1:]...)
+			break
+		}
+	}
+	for i := range n.Log[n.Id] {
+		// remove from log
+		if n.Log[n.Id][i].Follower == follower && n.Log[n.Id][i].User == user {
+			n.Log[n.Id] = append(n.Log[n.Id][:i], n.Log[n.Id][i+1:]...)
+			break
 		}
 	}
 	//Since the record has been removed, we can delete

@@ -175,7 +175,8 @@ func (localN *Node) UnblockUser(username string) {
 	userID, _ := strconv.Atoi(username)
 	twtUnblock := tweet{"", localN.Id, userID, time.Now().UTC(), localN.Ci, 2}
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twtUnblock)
-	delete(localN.Blocks[localN.Id], userID)
+	//delete(localN.Blocks[localN.Id], userID)
+	localN.Blocks[localN.Id][userID] = false
 	localN.writeLog()
 	localN.writeDict()
 }
