@@ -259,3 +259,40 @@ func (n *Node) incrementClock() {
 	n.Ci = n.Ci + 1
 	n.TimeArray[n.Id][n.Id] = n.Ci
 }
+
+func (n *Node) CleanDict() {
+	for i := range n.Blocks {
+		for j := range n.Blocks[i] {
+			if false == n.Blocks[i][j] {
+				n.truncate(i, j)
+			}
+		}
+	}
+}
+
+func (n *Node) truncate(user int, follower int) {
+	// check everyone has recieved delete command
+	var t tweet
+
+	for i := len(n.Log[user]) - 1; i >= 0; i-- {
+		if n.Log[user][i].Follower == follower && n.Log[user][i].Event == DELETE {
+			t = n.Log[follower][i]
+			break
+		}
+	}
+
+	for i := range n.TimeArray {
+		if false == n.hasRec(t, i) {
+			return
+		}
+	}
+	//remove from log
+	for i := range n.Log[n.Id] {
+		// remove from log
+		if n.Log[n.Id][i].Follower == follower && n.Log[n.Id][i].User == user {
+			n.Log[n.Id] = append(n.Log[n.Id][:i], n.Log[n.Id][i+1:]...)
+		}
+	}
+	//Since the record has been removed, we can delete
+	delete(n.Blocks[user], follower)
+}

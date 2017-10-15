@@ -35,7 +35,8 @@ func (n *Node) UpdateDict(events [][]tweet) {
 				// like I have to think with a a peice of paper
 				// Because I can't just add it if it already exists
 
-				delete(n.Blocks[record.User], record.Follower)
+				//delete(n.Blocks[record.User], record.Follower)
+				n.Blocks[record.User][record.Follower] = false
 				//sure
 			}
 		}
@@ -107,5 +108,9 @@ func (n *Node) receive(msg message) {
 	// I should have verification at this point that they are infact, not currently in
 	// the log
 	n.UpdateLog(newEvent)
+
+	n.CleanDict()
+
+	// why is this here?
 	fmt.Printf("Please enter a Command: ")
 }
