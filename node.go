@@ -302,7 +302,7 @@ func (n *Node) truncate(user int, follower int) {
 
 	for i := len(n.Log[user]) - 1; i >= 0; i-- {
 		if n.Log[user][i].Follower == follower && n.Log[user][i].Event == DELETE {
-			t = n.Log[follower][i]
+			t = n.Log[user][i]
 			break
 		}
 	}
