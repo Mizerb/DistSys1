@@ -23,14 +23,10 @@ type Node struct {
 	UserName string
 
 	Log [][]tweet
-	//LogMutex *sync.Mutex
 
 	TimeArray [][]int
-	//TimeMutex *sync.Mutex
 
-	Blocks map[int]map[int]bool //I guess I'm going to have to do an array of this, but I  don't want to
-	// Let It Be Known To All Who Read the Comments, I Didn't Want This
-	//BlockMutex *sync.Mutex
+	Blocks map[int]map[int]bool
 
 	ListenPort int
 	IPtargets  map[int]string
@@ -55,21 +51,7 @@ func makeNode(inputfile string, inputID int) *Node {
 	if err := json.Unmarshal(file, &info); err != nil {
 		log.Fatal(err)
 	}
-	/*
-		//To get the id, localport, and totalNodes, this separate object needs to be used
-		//var dat map[string]interface{}
-		//if err := json.Unmarshal(file, &dat); err != nil {
-		//	panic(err)
-		//}
 
-		//info.Id = int(dat["Id"].(float64))
-		//info.TotalNodes = int(dat["TotalNodes"].(float64))
-
-		//fmt.Println(info.Id)
-		//fmt.Println(info.TotalNodes)
-
-		//ret.Id = info.Id
-	*/
 	ret.NodeMutex = &sync.Mutex{}
 	ret.Id = inputID
 	ret.Ci = 0
@@ -86,10 +68,8 @@ func makeNode(inputfile string, inputID int) *Node {
 	for i := 0; i < info.TotalNodes; i++ {
 		ret.Log[i] = make([]tweet, 0, 10)
 	}
-	//ret.LogMutex = &sync.Mutex{}
 
 	if check, err := ret.LoadTweets(staticLog); err != nil || check == false {
-		//log.Fatal("welp")
 		//create file
 		f, err := os.Create(staticLog)
 		if err != nil {
@@ -106,10 +86,8 @@ func makeNode(inputfile string, inputID int) *Node {
 		}
 	}
 
-	//ret.TimeMutex = &sync.Mutex{}
-
 	ret.Blocks = make(map[int]map[int]bool)
-	//ret.BlockMutex = &sync.Mutex{}
+
 	for i := 0; i < info.TotalNodes; i++ {
 		ret.Blocks[i] = make(map[int]bool)
 	}
@@ -157,8 +135,6 @@ func (n *Node) LoadTweets(filename string) (bool, error) {
 		return false, err
 	}
 
-	//n.LogMutex.Lock()
-	//defer n.LogMutex.Unlock()
 	if err := json.Unmarshal(file, &n.Log); err != nil {
 		return false, err
 	}
@@ -199,12 +175,9 @@ func (n *Node) LoadDict() (bool, error) {
 }
 
 func (n *Node) writeLog() {
-	//n.logMutex.Lock()
 	logBytes, err := json.MarshalIndent(n.Log, "", "  ")
-	//defer n.logMutex.Unlock()
 	if err != nil {
 		log.Fatal(err)
-		//might not want fatal here...
 	}
 	err = ioutil.WriteFile(staticLog, logBytes, 0644)
 	if err != nil {
@@ -213,8 +186,6 @@ func (n *Node) writeLog() {
 }
 
 func (n *Node) writeDict() {
-	//n.blockMutex.Lock()
-	//defer n.blockMutex.Unlock()
 	cheat := make(map[string]map[string]bool)
 
 	for i := range n.Blocks {
@@ -236,8 +207,6 @@ func (n *Node) writeDict() {
 }
 
 func (n *Node) writeTArray() {
-	//n.blockMutex.Lock()
-	//defer n.blockMutex.Unlock()
 	writeBytes, err := json.MarshalIndent(n.TimeArray, "", "  ")
 	if err != nil {
 		log.Fatalf("failed to Marshel to static Dict\n")
@@ -251,7 +220,6 @@ func (n *Node) writeTArray() {
 func (n *Node) LoadTArray() (bool, error) {
 	_, err := os.Stat(staticTArray)
 	if os.IsNotExist(err) {
-		//log.Panicln("DICT FILE NOT YET CREATED")
 		log.Println("TARRAY FILE NOT YET CREATED")
 		return false, nil
 	}
@@ -260,8 +228,6 @@ func (n *Node) LoadTArray() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	//n.TimeMutex.Lock()
-	//defer n.TimeMutex.Unlock()
 	if err := json.Unmarshal(file, &n.TimeArray); err != nil {
 		return false, err
 	}
