@@ -74,6 +74,10 @@ func (n *Node) receive(msg message) {
 
 	n.CleanDict()
 
+	n.writeDict()
+	n.writeLog()
+	n.writeTArray()
+
 	//provide clarity to user that user input is still available
 	fmt.Printf("Please enter a Command: ")
 }

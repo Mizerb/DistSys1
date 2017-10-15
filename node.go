@@ -85,6 +85,15 @@ func makeNode(inputfile string, inputID int) *Node {
 			ret.TimeArray[i][z] = 0
 		}
 	}
+	if check, err := ret.LoadTArray(); err != nil || check == false {
+		f, err := os.Create(staticTArray)
+		if err != nil {
+			log.Fatalln("cannot created staticTarray")
+		}
+		f.Close()
+	}
+
+	ret.Ci = ret.TimeArray[ret.Id][ret.Id]
 
 	ret.Blocks = make(map[int]map[int]bool)
 
