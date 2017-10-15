@@ -19,7 +19,6 @@ func (localN *Node) PrintLog() {
 			continue
 		}
 		for j := 0; j < len(localN.Log[i]); j++ {
-			//fmt.Println(" -", localN.Log[i][j])
 			fmt.Printf(time.Time.String(localN.Log[i][j].Clock) + " - ")
 			fmt.Printf("User " + strconv.Itoa(localN.Log[i][j].User) + " at counter " + strconv.Itoa(localN.Log[i][j].Counter) + ", ")
 			if localN.Log[i][j].Event == 0 {
@@ -81,8 +80,6 @@ func OrganizeTweets(logContent [][]tweet) []tweet {
 }
 
 func (localN *Node) ViewTweets() {
-	//localN.updateLocalTimeArray()
-	//fmt.Println(localN.TimeArray)
 	fmt.Println("Current events in log:")
 	organizedLog := OrganizeTweets(localN.Log)
 	logReverse := reverse(organizedLog)
@@ -93,18 +90,6 @@ func (localN *Node) ViewTweets() {
 			fmt.Printf(logReverse[i].Message)
 			fmt.Println("")
 		}
-		//Code for printing all tweets, block and unblock events
-		//fmt.Printf(time.Time.String(logReverse[i].Clock) + " - ")
-		//fmt.Printf("User " + strconv.Itoa(logReverse[i].User) + " at counter " + strconv.Itoa(logReverse[i].Counter) + ", ")
-		/*if logReverse[i].Event == 0 && localN.Blocks[localN.Id][logReverse[i].User] == false {
-			fmt.Printf("TWEET: " + logReverse[i].Message)
-		} else if logReverse[i].Event == 1 {
-			fmt.Printf("BLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
-		} else if logReverse[i].Event == 2 {
-			fmt.Printf("UNBLOCK: Follower " + strconv.Itoa(logReverse[i].Follower))
-		}*/
-		//fmt.Println(" - ", logReverse[i].Message)
-		//fmt.Println("")
 	}
 }
 
@@ -113,7 +98,6 @@ func (localN *Node) TweetEvent(message string) {
 	localN.NodeMutex.Lock()
 	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
-	//localN.Ci++
 	twt := tweet{message, localN.Id, localN.Id, time.Now().UTC(), localN.Ci, 0}
 	//update the tweet in memory
 	localN.Log[localN.Id] = append(localN.Log[localN.Id], twt)
@@ -124,7 +108,6 @@ func (localN *Node) TweetEvent(message string) {
 }
 
 func (localN *Node) InvalidBlock(username string, blockType int) bool {
-	//userID, _ := strconv.Atoi(username)
 	userID, err := strconv.Atoi(username)
 	if err != nil {
 		return true
@@ -157,7 +140,6 @@ func (localN *Node) BlockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
-	//localN.Ci++
 	localN.NodeMutex.Lock()
 	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
@@ -174,7 +156,6 @@ func (localN *Node) UnblockUser(username string) {
 		log.Println("Invalid Block Call")
 		return
 	}
-	//localN.Ci++
 	localN.NodeMutex.Lock()
 	defer localN.NodeMutex.Unlock()
 	localN.incrementClock()
@@ -190,7 +171,6 @@ func (localN *Node) UnblockUser(username string) {
 func InputHandler(local *Node) {
 	reader := bufio.NewReader(os.Stdin)
 	for true {
-		//done := make(chan bool)
 		fmt.Printf("Please enter a Command: ")
 		inputTmp, _ := reader.ReadString('\n')
 		input := strings.Replace(inputTmp, "\r", "", -1)
@@ -203,12 +183,10 @@ func InputHandler(local *Node) {
 			fmt.Printf("View called\n")
 			local.ViewTweets()
 		} else if i := strings.Index(input, "block"); i == 0 {
-			//username := input[6 : len(input)-1]
 			username := input[6:7]
 			fmt.Printf("Block called on %s\n", username)
 			local.BlockUser(username)
 		} else if i := strings.Index(input, "unblock"); i == 0 {
-			//username := input[8 : len(input)-1
 			username := input[8:9]
 			fmt.Printf("Unblock called on %s\n", username)
 			local.UnblockUser(username)
