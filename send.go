@@ -6,24 +6,8 @@ import (
 	"net"
 )
 
-//will generate messages that can be sent else were
-// but main purpose is to generate messages for all
-// other nodes
-// essentailly, you only can send out messages when
-//  there's a new tweet, so this requires that tweet.
-// I'll talk it over with Ian...
+//Generate message for send
 func (n *Node) BroadCast() {
-	// locks should be applied here
-	/*
-		n.BlockMutex.Lock()
-		defer n.BlockMutex.Unlock()
-
-		n.LogMutex.Lock()
-		defer n.LogMutex.Unlock()
-
-		n.TimeMutex.Lock()
-		defer n.TimeMutex.Unlock()
-	*/
 	for i, ip := range n.IPtargets {
 		if ok := n.Blocks[n.Id][i]; ok {
 			log.Println("ID ", i, " is blocked, not sending to location")
@@ -39,10 +23,10 @@ func (n *Node) BroadCast() {
 	return
 }
 
+//Send the message the other ip targets
 func (n *Node) Send(conn net.Conn, k int) {
 	defer conn.Close()
 	var msg message
-	//n.LogMutex.Lock()
 	msg.Events = make([][]tweet, len(n.Log))
 	msg.Ti = n.TimeArray
 	msg.SendID = n.Id
